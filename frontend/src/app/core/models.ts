@@ -1,4 +1,4 @@
-// TypeScript interfaces mirroring the Cadence API (camelCase JSON).
+// TypeScript interfaces mirroring the risr/crm API (camelCase JSON).
 
 export type IssueType = 'story' | 'bug' | 'task' | 'epic';
 export type Status = 'backlog' | 'todo' | 'inprogress' | 'review' | 'done';

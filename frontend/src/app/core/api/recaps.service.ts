@@ -16,7 +16,7 @@ export class RecapsService {
   sync(): Observable<RecapSyncResult> {
     return this.http.post<RecapSyncResult>(`${this.base}/recaps/sync`, {});
   }
-  /** Turn the Nth next-step of a recap into a Cadence ticket. */
+  /** Turn the Nth next-step of a recap into a risr/crm ticket. */
   actionItem(recapId: number, index: number): Observable<Issue> {
     return this.http.post<Issue>(`${this.base}/recaps/${recapId}/action-item`, { index });
   }

@@ -109,11 +109,11 @@
         </section>
       }
 
-      <!-- Cadence AI card -->
+      <!-- risr/crm AI card -->
       <section class="card aibox">
         <div class="ai-head">
           <span class="ai-tile"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg></span>
-          <div class="ai-titles"><span class="ai-name">Cadence AI</span><span class="ai-by">Context-aware assistant</span></div>
+          <div class="ai-titles"><span class="ai-name">risr/crm AI</span><span class="ai-by">Context-aware assistant</span></div>
         </div>
 
         @switch (aiState().phase) {
@@ -167,7 +167,7 @@
                 </button>
                 <button class="btn btn-ai-soft" (click)="summarize()">Summarize thread</button>
               </div>
-              <p class="ai-note">Cadence AI diagnoses the ticket, writes the fix, and opens a pull request for review.</p>
+              <p class="ai-note">risr/crm AI diagnoses the ticket, writes the fix, and opens a pull request for review.</p>
             } @else {
               <button class="btn btn-ai" (click)="summarize()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
@@ -343,7 +343,7 @@
           <div class="gh-connect">
             <div class="gc-text">
               <b>Connect a GitHub repository</b>
-              <span>Cadence identifies branches &amp; PRs for each ticket by its code (e.g. <span class="mono">{{ iss.key }}</span>).</span>
+              <span>risr/crm identifies branches &amp; PRs for each ticket by its code (e.g. <span class="mono">{{ iss.key }}</span>).</span>
             </div>
             <div class="gc-row">
               <input class="gc-input mono" [value]="repoInput()" (input)="onRepoInput($event)" placeholder="owner/repo" />
@@ -374,7 +374,7 @@
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
                 </span>
                 <div class="cbody">
-                  <div class="chead"><b>Cadence AI</b><span class="ai-tag">AI</span><span class="ctime">{{ time(c.createdAt) }}</span></div>
+                  <div class="chead"><b>risr/crm AI</b><span class="ai-tag">AI</span><span class="ctime">{{ time(c.createdAt) }}</span></div>
                   <p>{{ c.body }}</p>
                 </div>
               </div>
@@ -393,7 +393,7 @@
               <span class="ai-ava">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
               </span>
-              <div class="cbody"><app-thinking-dots message="Cadence AI is researching the code" /></div>
+              <div class="cbody"><app-thinking-dots message="risr/crm AI is researching the code" /></div>
             </div>
           }
         </div>

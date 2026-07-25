@@ -187,7 +187,7 @@ export class CalendarComponent {
     this.selectedId.set(null);
   }
 
-  /** Turn a recap next-step into a Cadence ticket. */
+  /** Turn a recap next-step into a risr/crm ticket. */
   createTicket(recapId: number, index: number) {
     if (this.creating() !== null || this.ticketFor()[index]) return;
     this.creating.set(index);

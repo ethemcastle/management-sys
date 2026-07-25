@@ -10,14 +10,14 @@ import { ThinkingDotsComponent } from '../shared/thinking-dots';
   template: `
     @if (ai.panelOpen()) {
       <div class="scrim" (click)="ai.closePanel()"></div>
-      <aside class="panel" role="dialog" aria-label="Cadence AI">
+      <aside class="panel" role="dialog" aria-label="risr/crm AI">
         <div class="phead">
           <span class="tile">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="#fff">
               <path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
           </span>
           <div class="ptitle">
-            <span class="pn">Cadence AI</span>
+            <span class="pn">risr/crm AI</span>
             <span class="ps">Context-aware assistant</span>
           </div>
           <button class="x" (click)="ai.closePanel()" aria-label="Close">
@@ -64,7 +64,7 @@ import { ThinkingDotsComponent } from '../shared/thinking-dots';
         </div>
 
         <div class="pfoot">
-          <input #q type="text" placeholder="Ask Cadence AI…" (keydown.enter)="ask(q.value); q.value = ''" />
+          <input #q type="text" placeholder="Ask risr/crm AI…" (keydown.enter)="ask(q.value); q.value = ''" />
           <button class="send" (click)="ask(q.value); q.value = ''" aria-label="Send">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6" /></svg>

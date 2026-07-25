@@ -29,7 +29,7 @@ export class CalendarService {
     return this.http.post<RecapResult>(`${this.base}/calendar/events/${id}/recap`, {});
   }
 
-  /** Turn a recap's next-step (action item) into a Cadence ticket. */
+  /** Turn a recap's next-step (action item) into a risr/crm ticket. */
   actionItemToTicket(recapId: number, index: number): Observable<Issue> {
     return this.http.post<Issue>(`${this.base}/calendar/recaps/${recapId}/action-item`, { index });
   }

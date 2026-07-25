@@ -31,7 +31,7 @@ export class MondayService {
     return this.http.post<MondayAccount>(`${this.base}/monday/disconnect`, {});
   }
 
-  /** Create a real Cadence ticket from a monday item. */
+  /** Create a real risr/crm ticket from a monday item. */
   importItem(id: number): Observable<MondayImportResult> {
     return this.http.post<MondayImportResult>(`${this.base}/monday/items/${id}/import`, {});
   }

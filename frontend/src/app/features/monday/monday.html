@@ -26,8 +26,8 @@
         <div class="m-ico"><span class="mdots big"><i></i><i></i><i></i></span></div>
         <h2>Connect monday.com</h2>
         <p>
-          Pull your monday.com boards into Cadence. Every item is imported <b>automatically</b>
-          as a real Cadence ticket, and each board shows up here — and in the sidebar — organised
+          Pull your monday.com boards into risr/crm. Every item is imported <b>automatically</b>
+          as a real risr/crm ticket, and each board shows up here — and in the sidebar — organised
           just like it is in monday.
         </p>
         <button class="btn btn-accent connect-btn" [disabled]="connecting()" (click)="connect()">
@@ -98,7 +98,7 @@
                       }
                       <div class="kc-foot">
                         @if (it.issueKey) {
-                          <a class="cadkey" [routerLink]="['/issues', it.issueKey]" [title]="'Open ' + it.issueKey + ' in Cadence'">
+                          <a class="cadkey" [routerLink]="['/issues', it.issueKey]" [title]="'Open ' + it.issueKey + ' in risr/crm'">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                             {{ it.issueKey }}
                           </a>

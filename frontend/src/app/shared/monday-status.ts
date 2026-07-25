@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /** The item's real monday status, shown verbatim with its monday colour (e.g.
- *  "Stuck" red, "Not Started" grey) — so Cadence keeps monday's statuses as-is
+ *  "Stuck" red, "Not Started" grey) — so risr/crm keeps monday's statuses as-is
  *  instead of collapsing them into its own 5. */
 @Component({
   selector: 'app-monday-status',
