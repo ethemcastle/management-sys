@@ -187,10 +187,16 @@ def disconnect(db: Session = Depends(get_db)) -> MondayAccountOut:
 
 
 def _priority_from_columns(columns: list[dict] | None) -> int | None:
-    """Map a monday Priority column value onto the risr/crm 0..3 priority scale."""
+    """Map a monday Priority column value onto the risr/crm 0..3 priority scale.
+    Tolerates decorated labels (e.g. "Critical ⚠️") by matching a known keyword."""
     for c in columns or []:
         if "priorit" in (c.get("title") or "").lower():
-            return _PRIORITY_MAP.get((c.get("text") or "").strip().lower())
+            text = (c.get("text") or "").strip().lower()
+            if not text:
+                return None
+            if text in _PRIORITY_MAP:
+                return _PRIORITY_MAP[text]
+            return next((v for k, v in _PRIORITY_MAP.items() if k in text), None)
     return None
 
 
