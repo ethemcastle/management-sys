@@ -31,6 +31,8 @@ interface BurndownGeom {
   todayX: number;
   yLabels: { text: string; y: number }[];
   xLabels: { text: string; x: number }[];
+  /** Hover markers on the actual line (one per elapsed day). */
+  actualDots: { x: number; y: number; label: string }[];
 }
 
 /** A single grouped column in the velocity chart, with heights as percentages. */
@@ -130,6 +132,20 @@ interface DistSeg {
                 stroke-linecap="round"
                 stroke-linejoin="round"
               />
+
+              <!-- actual data points (hover for the remaining value) -->
+              @for (d of b.actualDots; track d.x) {
+                <circle
+                  [attr.cx]="d.x"
+                  [attr.cy]="d.y"
+                  r="2.6"
+                  fill="var(--accent)"
+                  stroke="var(--surface)"
+                  stroke-width="1"
+                >
+                  <title>{{ d.label }}</title>
+                </circle>
+              }
 
               <!-- today marker -->
               <line
@@ -488,13 +504,22 @@ export class ReportsComponent {
     };
 
     // Actual line points as {x,y} objects (reused for the polyline + area fill).
+    // Plotted on the SAME day-scale as the ideal line (divide by total day steps,
+    // not by the actual length) so "actual" stops at Today instead of being
+    // stretched across the full chart width.
+    const daySteps = Math.max(1, b.ideal.length - 1);
     const actualXY = b.actual.map((v, i) => ({
-      x: round(padL + (b.actual.length <= 1 ? 0 : (i / (b.actual.length - 1)) * innerW)),
+      x: round(padL + (i / daySteps) * innerW),
       y: round(baseY - (Math.max(0, v) / max) * chartH),
     }));
 
     const idealPts = toPts(b.ideal);
     const actualPts = actualXY.map((p) => `${p.x},${p.y}`).join(' ');
+    const actualDots = actualXY.map((p, i) => ({
+      x: p.x,
+      y: p.y,
+      label: `Day ${i}: ${b.actual[i]} pts left`,
+    }));
 
     // Closed area under the actual line: baseline → line → baseline → close.
     let areaPath = '';
@@ -540,6 +565,7 @@ export class ReportsComponent {
       todayX: round(todayX),
       yLabels: yLabels.map((y) => ({ text: y.text, y: round(y.y) })),
       xLabels: xLabels.map((x) => ({ text: x.text, x: round(x.x) })),
+      actualDots,
     };
   });
 

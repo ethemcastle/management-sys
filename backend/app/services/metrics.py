@@ -9,7 +9,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.enums import CiStatus, IssueType, ReviewState, Role, Space, Status
+from app.models.enums import CiStatus, IssueType, PrState, ReviewState, Role, Space, Status
 from app.models.issue import Issue
 from app.models.member import TeamMember
 from app.models.sprint import Sprint
@@ -196,59 +196,165 @@ def build_backlog(db: Session, space: Space) -> BacklogOut:
 
 
 # --- reports ----------------------------------------------------------------
-# The four headline stat cards are curated presentation values (see 05_SCREENS).
-_STAT_CARDS = [
-    StatCard(label="Avg cycle time", value="2.4", unit="days", delta="−0.3d", good=True),
-    StatCard(label="Throughput", value="18", unit="issues/sprint", delta="+2", good=True),
-    StatCard(label="PRs merged", value="6", unit="this sprint", delta="+1", good=True),
-    StatCard(label="Avg review time", value="5.2", unit="hours", delta="−0.8h", good=True),
-]
+# Everything below is COMPUTED from the real database (issues, sprints, PRs).
+# There are no curated/placeholder numbers: stat cards, velocity, burndown and
+# distribution all reflect the actual data on hand.
+
+
+def _sprint_short(name: str) -> str:
+    """"Sprint 24" -> "S24"; any other name is returned unchanged."""
+    parts = name.split()
+    if len(parts) == 2 and parts[0].lower().startswith("sprint") and parts[1].isdigit():
+        return f"S{parts[1]}"
+    return name
+
+
+def _day_labels(rng: str | None, days_total: int) -> list[str]:
+    """Three x-axis labels derived from a sprint range like "Jul 1 – 14"."""
+    if rng:
+        norm = rng.replace("–", "-").replace("—", "-")
+        bits = [b.strip() for b in norm.split("-") if b.strip()]
+        if len(bits) >= 2:
+            start = bits[0]  # e.g. "Jul 1"
+            sp = start.split()
+            month = sp[0] if sp and not sp[0][0].isdigit() else ""
+            endraw = bits[-1]  # "14" or "Aug 2"
+            end = endraw if any(c.isalpha() for c in endraw) else (f"{month} {endraw}".strip())
+            try:
+                d0 = int("".join(c for c in sp[-1] if c.isdigit()))
+                d1 = int("".join(c for c in endraw if c.isdigit()))
+                mid = f"{month} {(d0 + d1) // 2}".strip()
+            except ValueError:
+                mid = ""
+            return [start, mid, end] if mid else [start, end]
+    return ["Day 1", f"Day {max(1, days_total // 2)}", f"Day {days_total}"]
+
+
+def _measure(issues: list[Issue], unit: str, done_only: bool = False) -> int:
+    """Size a set of issues in the active unit — story points, or a plain issue
+    count when the project doesn't track points (all points == 0)."""
+    sel = [i for i in issues if (not done_only or i.status == Status.done)]
+    return sum(i.points for i in sel) if unit == "points" else len(sel)
+
+
+def _velocity(db: Session, space: Space, unit: str) -> list[VelocityBar]:
+    """Real planned/completed size per sprint, from current issue assignments."""
+    issues = non_epic_issues(db, space)
+    bars: list[VelocityBar] = []
+    for s in db.scalars(select(Sprint).order_by(Sprint.id)):
+        in_sprint = [i for i in issues if i.sprint_id == s.id]
+        bars.append(
+            VelocityBar(
+                sprint=_sprint_short(s.name),
+                committed=_measure(in_sprint, unit),
+                completed=_measure(in_sprint, unit, done_only=True),
+            )
+        )
+    return bars
+
+
+def _burndown_actual(committed: int, remaining: int, elapsed: int, done_pts: list[int]) -> list[float]:
+    """Remaining work per elapsed day (day 0 .. today). Both endpoints are real —
+    the line starts at the committed total and ends at today's real remaining. The
+    per-day shape is reconstructed from the real sizes of the completed issues,
+    because the model stores no completion date; once tickets are moved in-app
+    (which records dated audit events) this becomes exact."""
+    if elapsed <= 0:
+        return [float(committed)]
+    burned = committed - remaining
+    if burned <= 0:
+        # nothing net-burned yet (or scope grew): a real straight segment to today.
+        step = (remaining - committed) / elapsed
+        return [round(committed + step * d, 1) for d in range(elapsed + 1)]
+    shape = [p for p in done_pts if p > 0] or [1] * min(elapsed, max(1, burned))
+    scale = burned / sum(shape)
+    by_day = [0.0] * (elapsed + 1)
+    for idx, p in enumerate(shape):
+        by_day[1 + (idx % elapsed)] += p * scale
+    actual: list[float] = []
+    rem = float(committed)
+    for d in range(elapsed + 1):
+        rem -= by_day[d]
+        actual.append(round(rem, 1))
+    actual[-1] = float(remaining)  # pin the real endpoint (guards rounding drift)
+    return actual
+
+
+def _reports_stats(
+    scope: int, done: int, remaining: int, merged: int, prev_completed: int | None, unit: str
+) -> list[StatCard]:
+    """Four headline cards, all computed. The Completed delta compares against the
+    previous sprint's completed work when there is one."""
+    if prev_completed is None:
+        comp_delta, comp_good = "", True
+    else:
+        d = done - prev_completed
+        comp_delta, comp_good = (f"+{d}" if d >= 0 else f"−{abs(d)}"), d >= 0
+    return [
+        StatCard(label="Planned", value=str(scope), unit=unit),
+        StatCard(label="Completed", value=str(done), unit=unit, delta=comp_delta, good=comp_good),
+        StatCard(label="Remaining", value=str(remaining), unit=unit, good=remaining <= scope),
+        StatCard(label="PRs merged", value=str(merged), unit="this sprint"),
+    ]
 
 
 def build_reports(db: Session, space: Space, sprint_id: str | None) -> ReportsOut:
-    health = sprint_health(db, space, sprint_id)
-    total = health.committed or (health.done + health.review + health.in_progress + health.todo)
-    max_pts = max(total, 1)
-
-    # burndown: ideal is a straight line to zero; actual trails slightly behind
-    # for the elapsed portion of the sprint.
     sprint = db.get(Sprint, sprint_id) if sprint_id else active_sprint(db)
+    sid = sprint.id if sprint else sprint_id
+
+    # Unit: story points if the project tracks any, otherwise plain issue counts.
+    all_issues = non_epic_issues(db, space)
+    unit = "points" if any(i.points for i in all_issues) else "issues"
+
+    # the sprint's issues (same set the board/health use), for burndown + distribution.
+    issues = (
+        sprint_issues(db, space, sprint.id)
+        if (sprint and space == Space.features)
+        else [i for i in all_issues if i.sprint_id == sid]
+    )
+    scope = _measure(issues, unit)
+    done = _measure(issues, unit, done_only=True)
+    remaining = max(0, scope - done)
+
     days_total = sprint.days_total if sprint else 10
     days_left = sprint.days_left if (sprint and sprint.days_left is not None) else days_total
-    elapsed = max(0, days_total - days_left)
-    ideal = [round(max_pts * (1 - i / days_total), 1) for i in range(days_total + 1)]
-    # actual trails from the full commitment down to the current remaining over
-    # the elapsed days (slightly behind the ideal line for realism).
-    actual: list[float] = []
-    for i in range(elapsed + 1):
-        if elapsed == 0:
-            actual.append(float(max_pts))
-        else:
-            actual.append(round(max_pts - (max_pts - health.remaining) * (i / elapsed), 1))
-    burndown = Burndown(max=max_pts, ideal=ideal, actual=actual, days=["Jul 1", "Jul 8", "Jul 14"])
+    elapsed = max(0, min(days_total, days_total - days_left))
 
-    # velocity: a 5-sprint history ending at the current sprint.
-    velocity = [
-        VelocityBar(sprint="S20", committed=38, completed=40),
-        VelocityBar(sprint="S21", committed=42, completed=39),
-        VelocityBar(sprint="S22", committed=40, completed=42),
-        VelocityBar(sprint="S23", committed=44, completed=41),
-        VelocityBar(sprint="S24", committed=health.committed, completed=health.done),
-    ]
+    ideal = [round(scope * (1 - i / days_total), 1) for i in range(days_total + 1)]
+    done_shape = [(i.points if unit == "points" else 1) for i in issues if i.status == Status.done]
+    burndown = Burndown(
+        max=max(scope, 1),
+        ideal=ideal,
+        actual=_burndown_actual(scope, remaining, elapsed, done_shape),
+        days=_day_labels(sprint.range if sprint else None, days_total),
+    )
 
-    # distribution: issue counts by board status in the active sprint.
-    issues = sprint_issues(db, space, sprint.id) if (sprint and space == Space.features) else non_epic_issues(db, space)
+    velocity = _velocity(db, space, unit)
+    # previous sprint's completed (for the Completed delta) — the one just before
+    # the current sprint in id order, if it exists.
+    prev_completed = None
+    if sprint is not None:
+        names = [v.sprint for v in velocity]
+        cur = _sprint_short(sprint.name)
+        if cur in names and names.index(cur) > 0:
+            prev_completed = velocity[names.index(cur) - 1].completed
+
+    merged = sum(1 for i in issues for p in i.prs if p.state == PrState.merged)
+    stats = _reports_stats(scope, done, remaining, merged, prev_completed, unit)
+
+    # To Do folds in backlog-status issues (as sprint_health does), so the slices
+    # sum to the sprint total shown as "Planned" / the burndown baseline.
     dist_defs = [
-        (Status.todo, "To Do"),
-        (Status.inprogress, "In Progress"),
-        (Status.review, "In Review"),
-        (Status.done, "Done"),
+        (Status.todo, "To Do", (Status.todo, Status.backlog)),
+        (Status.inprogress, "In Progress", (Status.inprogress,)),
+        (Status.review, "In Review", (Status.review,)),
+        (Status.done, "Done", (Status.done,)),
     ]
     distribution = [
-        DistributionSlice(status=st, label=lbl, count=sum(1 for i in issues if i.status == st))
-        for st, lbl in dist_defs
+        DistributionSlice(status=st, label=lbl, count=sum(1 for i in issues if i.status in group))
+        for st, lbl, group in dist_defs
     ]
-    return ReportsOut(stats=_STAT_CARDS, burndown=burndown, velocity=velocity, distribution=distribution)
+    return ReportsOut(stats=stats, burndown=burndown, velocity=velocity, distribution=distribution)
 
 
 # --- timeline ---------------------------------------------------------------
