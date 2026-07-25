@@ -15,6 +15,15 @@
       </span>
     </div>
 
+    @if (ws.spaces().length > 1) {
+      <div class="spaceseg">
+        @for (s of ws.spaces(); track s.id) {
+          <button type="button" [class.on]="ws.space() === s.id" (click)="setSpace(s.id)" [title]="s.name">
+            {{ s.name }}
+          </button>
+        }
+      </div>
+    }
   </div>
 
   <!-- Primary nav -->
