@@ -81,7 +81,7 @@ export class IssueDetailComponent {
 
   readonly mentionMatches = computed(() => {
     const q = this.mentionQuery();
-    const ai = { initials: 'AI', name: 'risr/crm AI', color: '#8B5CF6', isAi: true };
+    const ai = { initials: 'AI', name: 'risr/crm AI', color: '#003f75', isAi: true };
     const people = this.ws
       .members()
       .map((m) => ({ initials: m.initials, name: m.name, color: m.color, isAi: false }));

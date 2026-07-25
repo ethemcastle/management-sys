@@ -107,7 +107,7 @@ import { ThinkingDotsComponent } from '../shared/thinking-dots';
         width: 31px;
         height: 31px;
         border-radius: 9px;
-        background: linear-gradient(140deg, var(--ai), #7e77ff);
+        background: linear-gradient(140deg, var(--ai), var(--accent));
         display: grid;
         place-items: center;
         flex-shrink: 0;

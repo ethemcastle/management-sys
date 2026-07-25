@@ -167,7 +167,7 @@ type Kind = CatalogItem['kind'];
         border: 1px solid var(--border); background: var(--surface); color: var(--text-3);
         border-radius: 8px; cursor: pointer; flex-shrink: 0;
       }
-      .del:hover { color: var(--danger, #D95340); border-color: var(--danger, #D95340); }
+      .del:hover { color: var(--danger, #d00000); border-color: var(--danger, #d00000); }
       .empty { font-size: 12.5px; color: var(--text-3); padding: 8px 2px; }
       .addrow { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 12px; }
       .addrow .btn[disabled] { opacity: 0.5; cursor: not-allowed; }

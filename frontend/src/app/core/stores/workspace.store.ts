@@ -36,7 +36,7 @@ export class WorkspaceStore {
   readonly role = signal<Role>(read(LS.role, 'developer') as Role);
   readonly space = signal<Space>(read(LS.space, 'features') as Space);
   readonly theme = signal<Theme>(read(LS.theme, 'light') as Theme);
-  readonly accent = signal<string>(read(LS.accent, '#5A50E1'));
+  readonly accent = signal<string>(read(LS.accent, '#1f5b73'));
   readonly radius = signal<number>(Number(read(LS.radius, '12')));
   readonly density = signal<Density>(read(LS.density, 'comfortable') as Density);
 
@@ -65,7 +65,7 @@ export class WorkspaceStore {
     () => this.spaces().find((s) => s.id === this.space()) ?? null,
   );
 
-  readonly accentOptions = ['#5A50E1', '#2E9E5B', '#0E7C86', '#D95340', '#C2410C'];
+  readonly accentOptions = ['#1f5b73', '#003f75', '#2a7d6e', '#c16124', '#d00000'];
 
   constructor() {
     // Apply theme/accent/radius to <html> and persist any preference change.

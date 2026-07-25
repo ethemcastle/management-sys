@@ -1,29 +1,31 @@
 // Design tokens — HIGH fidelity, from 04_DESIGN_TOKENS.md.
 // Components must reference these custom properties; never hardcode hex.
 // Toggle themes by setting data-theme="light|dark" on <html>.
+// Palette: risr design system — primary teal #1f5b73, secondary navy #003f75,
+// cool-neutral greys, risr semantic ramp (success / warning / danger / info).
 
 :root,
 [data-theme='light'] {
-  --bg: #f4f4f1;
+  --bg: #f4f4f4;
   --surface: #ffffff;
-  --surface-2: #f0f0ec;
-  --surface-3: #e7e7e1;
-  --border: #e5e4df;
-  --border-2: #d4d3cc;
-  --text: #191917;
-  --text-2: #63625b;
-  --text-3: #95948b;
-  --accent: #003f75;
+  --surface-2: #efefef;
+  --surface-3: #e6e6e6;
+  --border: #e4e4e4;
+  --border-2: #d8d8d8;
+  --text: #222223;
+  --text-2: #59595a;
+  --text-3: #8c8c8d;
+  --accent: #1f5b73;
   --accent-fg: #ffffff;
-  --ai: #1f5b73;
-  --success: #2e9e5b;
-  --success-soft: #e4f3eb;
-  --warning: #c0820a;
-  --warning-soft: #f6efdc;
-  --danger: #d95340;
-  --danger-soft: #f9e9e6;
-  --info: #3b7dd8;
-  --info-soft: #e7f0fb;
+  --ai: #003f75;
+  --success: #2a7d6e;
+  --success-soft: #eafbf7;
+  --warning: #c16124;
+  --warning-soft: #fbf0ea;
+  --danger: #d00000;
+  --danger-soft: #ffe5e5;
+  --info: #0069b3;
+  --info-soft: #e5f4ff;
   --radius: 12px;
   --pad: 16px;
   // derived accents
@@ -34,26 +36,26 @@
 }
 
 [data-theme='dark'] {
-  --bg: #0c0d10;
-  --surface: #141519;
-  --surface-2: #1c1d22;
-  --surface-3: #25262c;
-  --border: #26272e;
-  --border-2: #35363e;
-  --text: #ececee;
-  --text-2: #9e9ea6;
-  --text-3: #6b6c74;
-  --accent: #4a86c4;
+  --bg: #0e0e0f;
+  --surface: #171718;
+  --surface-2: #1f1f21;
+  --surface-3: #29292b;
+  --border: #2b2b2d;
+  --border-2: #3a3a3c;
+  --text: #ededee;
+  --text-2: #a5a5a6;
+  --text-3: #727273;
+  --accent: #318fb5;
   --accent-fg: #ffffff;
-  --ai: #3a97b5;
-  --success: #43b26e;
-  --success-soft: #132a1e;
-  --warning: #d9a23c;
-  --warning-soft: #2a2113;
-  --danger: #e86a56;
-  --danger-soft: #2e1a17;
-  --info: #5a9beb;
-  --info-soft: #132133;
+  --ai: #5b8dd6;
+  --success: #3edbbb;
+  --success-soft: #0c4036;
+  --warning: #e39869;
+  --warning-soft: #40200c;
+  --danger: #ff4d4d;
+  --danger-soft: #4d0000;
+  --info: #4db5ff;
+  --info-soft: #002d4d;
   --accent-soft: color-mix(in oklab, var(--accent) 22%, transparent);
   --accent-line: color-mix(in oklab, var(--accent) 42%, transparent);
   --ai-soft: color-mix(in oklab, var(--ai) 16%, transparent);
