@@ -1,6 +1,6 @@
-"""Write-through sync: push Cadence issue create/edit/delete out to monday.com.
+"""Write-through sync: push risr/crm issue create/edit/delete out to monday.com.
 
-Best-effort and NON-BLOCKING — a monday failure never fails the Cadence request;
+Best-effort and NON-BLOCKING — a monday failure never fails the risr/crm request;
 the issue is flagged pending (`monday_synced_at = NULL`) and re-pushed on the next
 Sync. Kept out of routers/issues.py and routers/monday.py to avoid import cycles.
 
@@ -27,7 +27,7 @@ from app.services.monday_service import (
 
 log = logging.getLogger("cadence.monday_sync")
 
-# Cadence → monday label CANDIDATES (ordered). Boards use different wording for
+# risr/crm → monday label CANDIDATES (ordered). Boards use different wording for
 # the same concept (balh "In Progress" vs a default board's "Working on it"), so
 # we offer synonyms and `_closest_label` picks whichever the board actually has.
 _STATUS_SYNONYMS: dict[Status, list[str]] = {
@@ -67,7 +67,7 @@ def resolve_board(db: Session, board_id: str | None = None) -> MondayBoard | Non
 
 
 def _status_candidates(issue: Issue) -> list[str]:
-    """Ordered monday status-label candidates for a Cadence issue (blocked first)."""
+    """Ordered monday status-label candidates for a risr/crm issue (blocked first)."""
     if issue.blocked:
         return _BLOCKED_SYNONYMS + _STATUS_SYNONYMS.get(issue.status, [])
     return _STATUS_SYNONYMS.get(issue.status, [])
@@ -97,7 +97,7 @@ def _values_for(board: MondayBoard, issue: Issue) -> dict:
 
 
 def _mirror(db: Session, issue: Issue, board: MondayBoard, item_id: str, group_id: str | None) -> None:
-    """Upsert the local MondayItem row for a Cadence-originated item so (a) the
+    """Upsert the local MondayItem row for a risr/crm-originated item so (a) the
     monday page shows it before the next pull and (b) the pull's link-preservation
     (by item_id) keeps it linked instead of re-importing a duplicate ticket."""
     item = db.scalars(select(MondayItem).where(MondayItem.item_id == item_id)).first()
@@ -117,7 +117,7 @@ def _mirror(db: Session, issue: Issue, board: MondayBoard, item_id: str, group_i
 
 
 def push_create(db: Session, issue: Issue, board_id: str | None = None, group_id: str | None = None) -> None:
-    """Create a matching monday item for a new Cadence issue and link them."""
+    """Create a matching monday item for a new risr/crm issue and link them."""
     if not _connected(db):
         return
     board = resolve_board(db, board_id)
@@ -171,7 +171,7 @@ def push_patch(db: Session, issue: Issue, changed: set[str]) -> None:
 
 
 def push_delete(db: Session, issue: Issue) -> None:
-    """Delete the linked monday item (the caller then deletes the Cadence issue)."""
+    """Delete the linked monday item (the caller then deletes the risr/crm issue)."""
     if not issue.monday_item_id or not _connected(db):
         return
     svc = get_monday_service()

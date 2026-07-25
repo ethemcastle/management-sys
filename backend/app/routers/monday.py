@@ -1,5 +1,5 @@
 """monday.com endpoints: connect (mock or live), list boards/items, sync,
-disconnect, and import a monday item into Cadence as a real ticket."""
+disconnect, and import a monday item into risr/crm as a real ticket."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -31,7 +31,7 @@ from app.services.monday_service import MondayService, get_monday_service
 
 router = APIRouter(prefix="/api/monday", tags=["monday"])
 
-# monday priority label -> Cadence priority int (0..3)
+# monday priority label -> risr/crm priority int (0..3)
 _PRIORITY_MAP: dict[str, int] = {
     "low": 0, "medium": 1, "med": 1, "normal": 1,
     "high": 2, "critical": 3, "urgent": 3,
@@ -45,7 +45,7 @@ _NATIVE_COLS = {
 # Column titles (lowercased) whose text becomes the ticket's description narrative.
 _NOTES_KEYS = ("notes", "note", "description", "long text", "details", "update", "updates", "text")
 
-# monday status label -> (Cadence status, blocked)
+# monday status label -> (risr/crm status, blocked)
 _STATUS_MAP: dict[str, tuple[Status, bool]] = {
     "Working on it": (Status.inprogress, False),
     "In Progress": (Status.inprogress, False),
@@ -108,7 +108,7 @@ def _board_out(board: MondayBoard) -> MondayBoardOut:
 
 
 def _reconcile_links(db: Session, boards: list[MondayBoard]) -> None:
-    """Clear soft links whose Cadence issue was deleted, so an item stops
+    """Clear soft links whose risr/crm issue was deleted, so an item stops
     claiming it's imported once its ticket is gone (and becomes importable again)."""
     linked = [i for b in boards for i in b.items if i.issue_key]
     if not linked:
@@ -148,7 +148,7 @@ def connect(
     acc.account_name = monday.account_name()
     acc.connected_at = datetime.now(timezone.utc)
     db.commit()
-    imported = _auto_import(db)  # every item becomes a Cadence ticket automatically
+    imported = _auto_import(db)  # every item becomes a risr/crm ticket automatically
     db.refresh(acc)
     return MondayConnectResult(
         account=MondayAccountOut.model_validate(acc), boards=boards, items=items, imported=imported
@@ -187,7 +187,7 @@ def disconnect(db: Session = Depends(get_db)) -> MondayAccountOut:
 
 
 def _priority_from_columns(columns: list[dict] | None) -> int | None:
-    """Map a monday Priority column value onto the Cadence 0..3 priority scale."""
+    """Map a monday Priority column value onto the risr/crm 0..3 priority scale."""
     for c in columns or []:
         if "priorit" in (c.get("title") or "").lower():
             return _PRIORITY_MAP.get((c.get("text") or "").strip().lower())
@@ -206,11 +206,11 @@ def _item_description(item: MondayItem, board_name: str) -> str:
 def _ticket_from_item(
     db: Session, item: MondayItem, board: MondayBoard | None, actor: str | None
 ) -> str:
-    """Create a Cadence ticket mirroring a monday item; link it back and audit.
+    """Create a risr/crm ticket mirroring a monday item; link it back and audit.
     The ticket's Product is set to the board name so it's categorised (sidebar
     sections + category pages) exactly the way monday groups it into boards."""
     status, blocked = _STATUS_MAP.get(item.status_label or "", (Status.backlog, False))
-    # Only adopt the owner as assignee if it maps to a real Cadence member.
+    # Only adopt the owner as assignee if it maps to a real risr/crm member.
     assignee = item.owner_initials if item.owner_initials and db.get(TeamMember, item.owner_initials) else None
     priority = _priority_from_columns(item.columns)
     board_name = board.name if board else "monday.com"
@@ -249,7 +249,7 @@ def _ticket_from_item(
 
 
 def _auto_import(db: Session) -> int:
-    """Create a Cadence ticket for every monday item that doesn't already have a
+    """Create a risr/crm ticket for every monday item that doesn't already have a
     live one. Idempotent — items whose linked ticket still exists are skipped."""
     items = list(db.scalars(select(MondayItem).order_by(MondayItem.board_pk, MondayItem.position)))
     boards = {b.id: b for b in db.scalars(select(MondayBoard))}
@@ -269,7 +269,7 @@ def _auto_import(db: Session) -> int:
 
 def _apply_monday_to_issue(db: Session, issue: Issue, item: MondayItem, board_name: str) -> bool:
     """Overwrite a linked ticket's SHARED fields from monday (monday wins), only
-    where they differ. Cadence-only fields (points/sprint/epic/PR/AI/audit) untouched."""
+    where they differ. risr/crm-only fields (points/sprint/epic/PR/AI/audit) untouched."""
     changed = False
     status, blocked = _STATUS_MAP.get(item.status_label or "", (Status.backlog, False))
     if item.status_label and issue.status != status:
@@ -279,7 +279,7 @@ def _apply_monday_to_issue(db: Session, issue: Issue, item: MondayItem, board_na
         issue.blocked = blocked
         changed = True
     # Keep the raw monday status label/colour (this changes even when two monday
-    # statuses collapse to the same Cadence status, e.g. Not Started ↔ Stuck).
+    # statuses collapse to the same risr/crm status, e.g. Not Started ↔ Stuck).
     if item.status_label and issue.monday_status != item.status_label:
         issue.monday_status = item.status_label
         issue.monday_status_color = item.status_color
@@ -308,7 +308,7 @@ def _apply_monday_to_issue(db: Session, issue: Issue, item: MondayItem, board_na
 
 
 def _pull_updates(db: Session) -> int:
-    """monday → Cadence: update every linked ticket from its monday item."""
+    """monday → risr/crm: update every linked ticket from its monday item."""
     items = list(db.scalars(select(MondayItem).where(MondayItem.issue_key.is_not(None))))
     boards = {b.id: b for b in db.scalars(select(MondayBoard))}
     updated = 0
@@ -337,7 +337,7 @@ def _pull_updates(db: Session) -> int:
 
 
 def _push_pending(db: Session) -> int:
-    """Cadence → monday: re-push dirty linked tickets, and create for unlinked
+    """risr/crm → monday: re-push dirty linked tickets, and create for unlinked
     tickets when a single target board is unambiguous (best-effort backfill)."""
     pushed = 0
     dirty = list(
@@ -365,7 +365,7 @@ def _push_pending(db: Session) -> int:
 
 def _reconcile_deleted(db: Session) -> None:
     """A ticket whose linked monday item no longer exists → unlink it + audit
-    (we keep the Cadence ticket; deletes only propagate Cadence → monday)."""
+    (we keep the risr/crm ticket; deletes only propagate risr/crm → monday)."""
     live = set(db.scalars(select(MondayItem.item_id)))
     orphaned = list(db.scalars(select(Issue).where(Issue.monday_item_id.is_not(None))))
     changed = False
@@ -381,7 +381,7 @@ def _reconcile_deleted(db: Session) -> None:
 
 @router.post("/items/{item_id}/import", response_model=MondayImportResult)
 def import_item(item_id: int, db: Session = Depends(get_db)) -> MondayImportResult:
-    """Create a real Cadence ticket from a single monday item (idempotent per item).
+    """Create a real risr/crm ticket from a single monday item (idempotent per item).
     Kept for manual re-import; connect/refresh import everything automatically."""
     item = db.get(MondayItem, item_id)
     if item is None:

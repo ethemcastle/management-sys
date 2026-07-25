@@ -263,7 +263,7 @@ def _parse_iso(value) -> datetime | None:
 
 class AppsScriptRecapService(GeminiRecapService):
     """Pull Gemini recaps from a Google Apps Script web app (its doGet returns
-    JSON). Cadence GETs the stable /exec URL — no inbound public URL needed."""
+    JSON). risr/crm GETs the stable /exec URL — no inbound public URL needed."""
 
     def account_label(self) -> str:
         return "Gemini · Apps Script"

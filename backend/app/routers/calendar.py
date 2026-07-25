@@ -197,7 +197,7 @@ def recap_event(
 def action_item_to_ticket(
     recap_id: int, payload: RecapActionItem, db: Session = Depends(get_db)
 ) -> IssueOut:
-    """Turn a recap's next-step (action item) into a Cadence ticket."""
+    """Turn a recap's next-step (action item) into a risr/crm ticket."""
     recap = db.get(MeetingRecap, recap_id)
     if recap is None:
         raise HTTPException(status_code=404, detail="Recap not found")

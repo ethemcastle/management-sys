@@ -165,7 +165,7 @@ _EMAILS: list[tuple] = [
      "[cadence] PR #814 checks failing",
      "The build failed on fix/billing-webhook. 1 of 3 checks failed — see the run for details.",
      EmailCategory.notification, ["github"], 2, True, False),
-    ("Cadence CI", "ci@cadence.dev", "#3B7DD8",
+    ("risr/crm CI", "ci@cadence.dev", "#3B7DD8",
      "Deploy to staging succeeded",
      "Build 4821 deployed to staging in 3m 12s. All smoke tests passed.",
      EmailCategory.notification, ["ci"], 6, False, False),
@@ -459,4 +459,4 @@ def reset_and_seed() -> None:
 
 if __name__ == "__main__":
     reset_and_seed()
-    print("Seeded Cadence database at", settings.database_url)
+    print("Seeded risr/crm database at", settings.database_url)

@@ -1,6 +1,6 @@
 # 05 · Screens
 
-Every view, component-by-component. Open `design/Cadence.dc.html` alongside this. Fidelity is HIGH —
+Every view, component-by-component. Open `design/risr/crm.dc.html` alongside this. Fidelity is HIGH —
 match layout, spacing, and copy. Exact colors/type/spacing are in `04_DESIGN_TOKENS.md`.
 
 Global chrome wraps all views:
@@ -8,13 +8,13 @@ Global chrome wraps all views:
 ## App shell
 
 ### Sidebar — 252px, `--surface`, right hairline. Top→bottom:
-1. **Workspace header:** app logo (accent rounded square + white bar-chart glyph), "Cadence" (800)
+1. **Workspace header:** app logo (accent rounded square + white bar-chart glyph), "risr/crm" (800)
    over "Northwind Inc." (placeholder company), chevron.
 2. **Space switcher** — label "SPACE" then two buttons: **Features** (cube icon, "Product development")
    and **Product Support** (headset icon, "Customer issues"). Active one has a filled accent icon tile
    + a small accent dot on the right. Switching space changes all data + which views make sense.
 3. **Primary nav** — "Home" then group **PLANNING**: Board, Backlog, Timeline, List;
-   group **INSIGHTS**: Reports, and **Cadence AI** (sparkle icon, purple, "NEW" pill → opens AI panel).
+   group **INSIGHTS**: Reports, and **risr/crm AI** (sparkle icon, purple, "NEW" pill → opens AI panel).
    Active item = `--accent-soft` bg, `--accent` text.
 4. **Footer:** "VIEW AS" segmented control **Developer | Product** (switches role → reshapes Home);
    current-user avatar chip (AL) + name + role label; theme toggle button (sun/moon).
@@ -40,7 +40,7 @@ Two-column grid **1.65fr / 1fr**:
   name, PR # + CI dot, **Review** button (accent-soft).
 
 **Right column:**
-- **Your standup** (AI) — purple-tinted card, sparkle icon, "Drafted by Cadence AI", 3–4 bullets,
+- **Your standup** (AI) — purple-tinted card, sparkle icon, "Drafted by risr/crm AI", 3–4 bullets,
   Copy / Post to Slack buttons, regenerate icon. Bullets come from `GET /api/dashboard`.
 - **Your pull requests** — list of the user's PRs (state dot, title, branch mono, PR# + CI dot).
 - **Sprint 24** health mini — big remaining-points number + committed, a segmented progress bar
@@ -114,10 +114,10 @@ title (H1), and a meta row of pills: status, priority (bars + label), points, fe
 + progress bar, "Add task"; each child row = completion check (circle→green check), type badge, key,
 title, status pill, points. Rows → child detail.
 
-**Cadence AI card** (purple gradient), state machine:
+**risr/crm AI card** (purple gradient), state machine:
 - *Features issues* → primary **"Summarize thread"** button.
 - *Support tickets* → primary **"Solve ticket with AI"** + secondary "Summarize thread", with the note
-  "Cadence AI diagnoses the ticket, writes the fix, and opens a pull request for review."
+  "risr/crm AI diagnoses the ticket, writes the fix, and opens a pull request for review."
 - *Loading* → spinner + "Reading N comments and the linked PR…".
 - *Summarized* → 3–5 bullets + a "Suggested resolution" (summary + affected file chips) + **"Create PR
   with this fix"**.
@@ -138,9 +138,9 @@ to <branch>"); a comment composer at the bottom (current-user avatar + input + C
 (clickable chip → parent, present when the issue has a parent), Labels. **Reviewers** section below:
 each reviewer avatar + name + state (approved/pending/changes with icon). "Request" link.
 
-## Cadence AI slide-over (global)
-Right-anchored 414px panel over a scrim, slides in. Header: gradient sparkle tile, "Cadence AI /
+## risr/crm AI slide-over (global)
+Right-anchored 414px panel over a scrim, slides in. Header: gradient sparkle tile, "risr/crm AI /
 Context-aware assistant", close. Body: a context chip ("Looking at <view> · <space>"), "Try asking"
 suggestion chips (Summarize this sprint / What's at risk? / Draft release notes / Find stale PRs), an
 idle empty state, a busy spinner, and a done state (titled bullet list + Copy / Create report). Footer:
-input + send. Opened from the sidebar "Cadence AI", the top-bar "Ask AI", and dashboard AI buttons.
+input + send. Opened from the sidebar "risr/crm AI", the top-bar "Ask AI", and dashboard AI buttons.

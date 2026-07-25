@@ -28,7 +28,7 @@ class ZoomAccountOut(CamelModel):
 
 
 class RecapActionItem(CamelModel):
-    """Turn the Nth next-step of a recap into a Cadence ticket."""
+    """Turn the Nth next-step of a recap into a risr/crm ticket."""
 
     index: int
 

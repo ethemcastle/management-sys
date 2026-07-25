@@ -1,7 +1,7 @@
 """Ybug feedback behind an interface.
 
 `build_issue_fields()` maps a Ybug feedback payload (the shape Ybug POSTs to the
-webhook / returns from its REST API) onto Cadence ticket fields. `YbugService` is
+webhook / returns from its REST API) onto risr/crm ticket fields. `YbugService` is
 the poll seam: `MockYbugService` returns simulated feedback so the flow is demoable
 offline; `LiveYbugService` hits the Ybug REST API when an API key is configured.
 Real-time still flows through the webhook (routers/ybug.py) regardless.

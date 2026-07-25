@@ -163,7 +163,7 @@ def _answer_prompt(issue: Issue, question: str, context: str) -> str:
             "or variable names."
         )
     return (
-        "You are Cadence AI, answering a question a teammate left in a ticket comment. Answer "
+        "You are risr/crm AI, answering a question a teammate left in a ticket comment. Answer "
         f"clearly and concretely in a few sentences. {rule}\n\n"
         f"Ticket {issue.key}: {issue.title}\n{(issue.description or '').strip()}\n\n"
         f"Question: {question}{ctx}\n\n"
@@ -255,7 +255,7 @@ def _grep(github, full: str, base: str, terms: list[str], allow_words: bool = Fa
 
 def _plan_prompt(issue: Issue) -> str:
     return (
-        "You are Cadence's code assistant. A ticket describes a change to make in a code "
+        "You are risr/crm's code assistant. A ticket describes a change to make in a code "
         "repository. Extract literal search strings that would LOCATE the code to change — "
         "exact substrings likely present verbatim in the source (visible UI text, identifiers, "
         "constants). Prefer SHORT distinctive substrings of 2-4 words — long phrases "

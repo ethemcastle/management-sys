@@ -36,7 +36,7 @@ class LiveAiService(MockAiService):
     # --- overridden AI methods -------------------------------------------------
     def summarize(self, issue: Issue) -> Summary:
         prompt = (
-            "You are Cadence, an assistant for a software team's issue tracker. "
+            "You are risr/crm, an assistant for a software team's issue tracker. "
             "Summarize the issue below for a busy engineer skimming it. Be concise, "
             "specific, and grounded ONLY in the data given — do not invent facts.\n\n"
             f"{self._issue_context(issue)}\n\n"
@@ -59,7 +59,7 @@ class LiveAiService(MockAiService):
 
     def assistant(self, question: str, context: AssistantContext) -> list[str]:
         prompt = (
-            "You are Cadence's workspace assistant. Answer the user's question in 2 to 4 "
+            "You are risr/crm's workspace assistant. Answer the user's question in 2 to 4 "
             "short, practical bullets. End with a bullet starting 'Net:'. "
             f"The user is on the '{context.view}' view in the '{context.space.value}' space.\n\n"
             f"Question: {question}\n\n"

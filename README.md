@@ -1,4 +1,4 @@
-# Cadence
+# risr/crm
 
 A Jira-class task manager for software teams, with **GitHub** and **AI** woven in —
 built from the design handoff in [`design_handoff_cadence/`](design_handoff_cadence).
@@ -15,7 +15,7 @@ built from the design handoff in [`design_handoff_cadence/`](design_handoff_cade
 - **Features contain tasks:** a Feature is an epic parent; its detail lists child tasks with a
   progress bar; children link back up.
 - **GitHub as data:** issues show linked branches, PRs, CI checks, and reviewers.
-- **Cadence AI:** summarize an issue thread, create an AI-authored PR, solve a support ticket
+- **risr/crm AI:** summarize an issue thread, create an AI-authored PR, solve a support ticket
   end-to-end, a developer standup, PO risk flags + weekly report, and a context-aware assistant panel.
 
 Everything external is mocked behind a small interface so the whole app is demoable offline:
@@ -143,7 +143,7 @@ script** (`backend/app/seed.py` + `app/seed_data.json`) — change the mocks the
 - Edit issues from the detail page — status, assignee, priority, points, sprint, and blocked all
   patch the backend inline; **drag-and-drop** on the Board patches status.
 - **Delete** an issue (detail overflow menu); **Start sprint** in the Backlog.
-- **GitHub connection** — connect a repository (`owner/repo`) and Cadence **identifies branches &
+- **GitHub connection** — connect a repository (`owner/repo`) and risr/crm **identifies branches &
   PRs for each ticket by its code** (issue key): a branch `feat/CAD-142-…` or a PR titled
   `CAD-142: …` auto-links to `CAD-142`. Shown in the issue's Development section. (Repo data is still
   a mock pool behind `MockGitHubService`; the real GitHub API is the one-file swap — the connect +

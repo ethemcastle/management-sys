@@ -282,18 +282,18 @@ class LiveGitHubService(MockGitHubService):
             f"- Priority: {issue.priority}\n"
             f"- Points: {issue.points}\n\n"
             f"{(issue.description or '').strip()}\n\n"
-            "_Placeholder commit opened by Cadence AI — replace with the real fix "
+            "_Placeholder commit opened by risr/crm AI — replace with the real fix "
             "once AI code-generation is wired in._\n"
         )
 
     @staticmethod
     def _pr_body(issue: Issue, changed: list[dict] | None = None) -> str:
-        head = f"Opened by **Cadence AI** for `{issue.key}` — {issue.title}."
+        head = f"Opened by **risr/crm AI** for `{issue.key}` — {issue.title}."
         if changed:
             files = "\n".join(f"- `{f['path']}`" for f in changed)
             return f"{head}\n\nApplied the change described in the ticket:\n{files}"
         return (
-            f"{head}\n\nThis PR contains a placeholder note (Cadence AI couldn't derive a "
+            f"{head}\n\nThis PR contains a placeholder note (risr/crm AI couldn't derive a "
             "concrete code change from the ticket). Add more detail to the ticket description "
             "and re-run to generate a real edit."
         )

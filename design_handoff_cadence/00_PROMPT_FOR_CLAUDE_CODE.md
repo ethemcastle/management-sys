@@ -7,7 +7,7 @@
 ---
 
 ```
-You are building **Cadence**, a Jira-class task manager for software teams, with GitHub and AI
+You are building **risr/crm**, a Jira-class task manager for software teams, with GitHub and AI
 integrations. I've given you a complete design handoff in `design_handoff_cadence/`. Read it
 before writing code:
 
@@ -19,7 +19,7 @@ before writing code:
 - design_handoff_cadence/05_SCREENS.md         — every screen, component-by-component
 - design_handoff_cadence/06_INTERACTIONS.md    — drag-and-drop, AI flows, theming, states
 - design_handoff_cadence/07_SEED_DATA.json     — demo data; seed the DB with exactly this
-- design_handoff_cadence/design/Cadence.dc.html — the interactive HTML PROTOTYPE (design reference)
+- design_handoff_cadence/design/risr/crm.dc.html — the interactive HTML PROTOTYPE (design reference)
 
 IMPORTANT: The HTML file is a DESIGN REFERENCE, not code to copy. Open it in a browser to see the
 intended look and behavior, then rebuild it properly in the stack below. Do not port its

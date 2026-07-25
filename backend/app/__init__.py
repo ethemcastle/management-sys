@@ -1,1 +1,1 @@
-"""Cadence backend application package."""
+"""risr/crm backend application package."""

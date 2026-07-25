@@ -1,6 +1,6 @@
 # 03 · API Contract
 
-REST API for Cadence (FastAPI). All responses are JSON, camelCase (configure Pydantic to alias
+REST API for risr/crm (FastAPI). All responses are JSON, camelCase (configure Pydantic to alias
 snake→camel). Base path `/api`. Issues are addressed by their **key** (`CAD-142`), not a numeric id.
 
 Query params shared by list endpoints: `space` (`features|support`, required for board/backlog/list),
@@ -103,7 +103,7 @@ POST /api/ai/tickets/{key}/solve
 
 POST /api/ai/assistant
 body { question: string, context: { view, space, sprint? } }
-→ { bullets: string[] }                       # the Cadence AI slide-over panel answer
+→ { bullets: string[] }                       # the risr/crm AI slide-over panel answer
 ```
 
 ### AI response content (mock guidance)

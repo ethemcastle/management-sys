@@ -1,8 +1,8 @@
-# Cadence — Developer Handoff Package
+# risr/crm — Developer Handoff Package
 
 **Target stack: Angular (frontend) + Python (backend).**
 
-This bundle is everything a developer (or Claude Code) needs to build **Cadence**, a Jira-class
+This bundle is everything a developer (or Claude Code) needs to build **risr/crm**, a Jira-class
 task manager for software teams — with GitHub and AI woven in. It was designed for three roles
 (Developer, Product Owner, Manager) and two "spaces" (product Features and Product Support).
 
@@ -26,7 +26,7 @@ Match them pixel-for-pixel. All exact values are in `04_DESIGN_TOKENS.md`.
 
 ## How to use this bundle
 
-1. **Open the prototype.** Open `design/Cadence.dc.html` in a browser. Click around: switch
+1. **Open the prototype.** Open `design/risr/crm.dc.html` in a browser. Click around: switch
    role (Developer/Product Owner) and space (Features/Product Support) in the sidebar, toggle
    light/dark, drag cards on the Board, open an issue, run the AI flows. This is your source of truth.
 2. **Give Claude Code the prompt.** `00_PROMPT_FOR_CLAUDE_CODE.md` is a ready-to-paste prompt.
@@ -48,7 +48,7 @@ Match them pixel-for-pixel. All exact values are in `04_DESIGN_TOKENS.md`.
 | `05_SCREENS.md` | Every view: purpose, layout, components, exact specs, copy. |
 | `06_INTERACTIONS.md` | Drag-and-drop, AI flows, theme/role/space switching, loading states. |
 | `07_SEED_DATA.json` | The exact demo data from the prototype — use for DB fixtures / mocks. |
-| `design/Cadence.dc.html` | The interactive HTML prototype (design reference). |
+| `design/risr/crm.dc.html` | The interactive HTML prototype (design reference). |
 | `design/support.js` | Runtime the prototype needs to render. Do not port — it's prototype-only. |
 
 ---
@@ -65,7 +65,7 @@ Match them pixel-for-pixel. All exact values are in `04_DESIGN_TOKENS.md`.
 - **Features contain tasks:** a Feature is a parent work item; its detail lists child tasks with a
   progress bar; a child links back up to its Feature.
 - **GitHub:** issues show linked branches, PRs, CI check status, and reviewers; "Create branch".
-- **AI (Cadence AI):** summarize an issue thread; **solve a support ticket → open a PR with the
+- **AI (risr/crm AI):** summarize an issue thread; **solve a support ticket → open a PR with the
   fix**; drafted developer standup; PO risk flags + weekly report; a context-aware assistant panel.
 
 See `05_SCREENS.md` for the full breakdown.

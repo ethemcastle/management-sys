@@ -1,6 +1,6 @@
 # 02 · Data Model
 
-Entities, enums, and relationships behind Cadence, with SQLAlchemy 2.x models and Pydantic v2
+Entities, enums, and relationships behind risr/crm, with SQLAlchemy 2.x models and Pydantic v2
 schemas. The seed data in `07_SEED_DATA.json` conforms exactly to this.
 
 ## Enums

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run ALL of Cadence (production build + public HTTPS tunnel) in one command,
+# Run ALL of risr/crm (production build + public HTTPS tunnel) in one command,
 # then print the URL to paste into Ybug.
 #
 #   ./run.sh          build + start everything, print the URLs
@@ -15,7 +15,7 @@ if [ "${1:-}" = "down" ]; then
   exit 0
 fi
 
-echo "▸ Building and starting Cadence…"
+echo "▸ Building and starting risr/crm…"
 "${COMPOSE[@]}" up --build -d
 
 echo "▸ Waiting for the public HTTPS URL (Cloudflare tunnel)…"
@@ -29,7 +29,7 @@ done
 
 echo
 echo "────────────────────────────────────────────────────────────"
-echo "  Cadence is running"
+echo "  risr/crm is running"
 echo "    Local:    http://localhost:8080"
 if [ -n "$URL" ]; then
   echo "    Public:   $URL"

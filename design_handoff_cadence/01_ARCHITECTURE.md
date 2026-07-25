@@ -1,6 +1,6 @@
 # 01 · Architecture
 
-Recommended stack and structure for building Cadence in **Angular + Python**. Adjust to house style,
+Recommended stack and structure for building risr/crm in **Angular + Python**. Adjust to house style,
 but keep the contracts in `02_DATA_MODEL.md` and `03_API_CONTRACT.md` stable.
 
 ## Stack

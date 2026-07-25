@@ -4,7 +4,7 @@ The monday.com link is mocked behind a `MockMondayService` seam; connecting
 imports boards/items into these rows. A `LiveMondayService` (activated when
 `CADENCE_MONDAY_TOKEN` is set) swaps in without any API/frontend change.
 
-`MondayItem.issue_key` is a soft link (not an enforced FK) to the Cadence Issue
+`MondayItem.issue_key` is a soft link (not an enforced FK) to the risr/crm Issue
 created when the item is imported "as a ticket" — so deleting that issue never
 blocks, it just leaves the item importable again.
 """
@@ -74,10 +74,10 @@ class MondayItem(Base):
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     position: Mapped[int] = mapped_column(Integer, default=0)
     # Full column snapshot from monday: list of {title, text, type} — everything on
-    # the item, saved so the data lives in Cadence without opening monday.
+    # the item, saved so the data lives in risr/crm without opening monday.
     columns: Mapped[list[dict]] = mapped_column(JSON, default=list)
 
-    # Soft link to the Cadence Issue created when this item is imported as a ticket.
+    # Soft link to the risr/crm Issue created when this item is imported as a ticket.
     issue_key: Mapped[str | None] = mapped_column(String(24), nullable=True)
 
     board: Mapped[MondayBoard] = relationship("MondayBoard", back_populates="items")

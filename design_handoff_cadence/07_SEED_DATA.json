@@ -1,5 +1,5 @@
 {
-  "_comment": "Exact seed data from the Cadence design prototype. Use it verbatim to build DB fixtures / mock API responses so the implemented app matches the design 1:1. Keys, statuses, points, PRs and relationships are all meaningful.",
+  "_comment": "Exact seed data from the risr/crm design prototype. Use it verbatim to build DB fixtures / mock API responses so the implemented app matches the design 1:1. Keys, statuses, points, PRs and relationships are all meaningful.",
 
   "currentUser": "AL",
 

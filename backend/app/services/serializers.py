@@ -112,7 +112,7 @@ def _sync_state(issue: Issue) -> str | None:
 
 
 # Synthetic author for AI-authored comments (no real team member needed).
-_AI_AUTHOR = MemberRef(initials="AI", name="Cadence AI", color="#8B5CF6")
+_AI_AUTHOR = MemberRef(initials="AI", name="risr/crm AI", color="#8B5CF6")
 
 
 def comment_out(comment: Comment) -> CommentOut:

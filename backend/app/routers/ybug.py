@@ -1,7 +1,7 @@
 """Ybug endpoints: receive visual feedback and turn it into board tickets.
 
 - `POST /api/ybug/webhook` — real-time: Ybug POSTs each `feedback.created` here
-  (HMAC-verified with the webhook secret). Needs a public URL to reach Cadence.
+  (HMAC-verified with the webhook secret). Needs a public URL to reach risr/crm.
 - `POST /api/ybug/sync` — poll the Ybug REST API for new feedback (works on
   localhost). Cursor = `YbugAccount.last_feedback_id` so tickets don't duplicate.
 - `POST /api/ybug/simulate` — create one demo feedback ticket (offline demo).

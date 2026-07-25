@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     # Recaps intake: optional shared secret for POST /api/recaps/webhook, so a
     # notetaker (Fireflies/Fathom) or the Gemini bridge can push recaps securely.
     recaps_webhook_secret: str | None = None
-    # Recaps pull: a Google Apps Script web-app /exec URL that Cadence GETs (with
+    # Recaps pull: a Google Apps Script web-app /exec URL that risr/crm GETs (with
     # the secret as ?token=) to fetch Gemini recaps — no inbound public URL needed.
     recaps_script_url: str | None = None
 

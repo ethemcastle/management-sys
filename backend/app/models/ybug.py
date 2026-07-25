@@ -1,4 +1,4 @@
-"""Ybug connection state. Ybug feedback (visual bug reports) becomes Cadence
+"""Ybug connection state. Ybug feedback (visual bug reports) becomes risr/crm
 board tickets — in real time via the webhook, or by polling the Ybug REST API.
 `last_feedback_id` is the poll cursor so we don't create duplicate tickets.
 """

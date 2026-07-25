@@ -1,4 +1,4 @@
-# Production-style run of Cadence — baked images (no source mounts), the Angular
+# Production-style run of risr/crm — baked images (no source mounts), the Angular
 # app compiled and served by nginx, and a persistent volume for the SQLite DB.
 # The exact same setup runs on your laptop and on a VPS.
 #

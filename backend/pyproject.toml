@@ -1,7 +1,7 @@
 [project]
 name = "cadence-backend"
 version = "0.1.0"
-description = "Cadence — Jira-class task manager API (FastAPI)"
+description = "risr/crm — Jira-class task manager API (FastAPI)"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",

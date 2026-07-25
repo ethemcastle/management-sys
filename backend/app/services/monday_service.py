@@ -120,7 +120,7 @@ class MockMondayService(MondayService):
 
     def import_boards(self, db: Session) -> tuple[int, int]:
         # Idempotent: if boards already exist, treat (re)connect/sync as a no-op —
-        # preserves any items already imported into Cadence tickets.
+        # preserves any items already imported into risr/crm tickets.
         existing = db.scalar(select(func.count()).select_from(MondayBoard))
         if existing:
             items = db.scalar(select(func.count()).select_from(MondayItem)) or 0
@@ -196,7 +196,7 @@ class MockMondayService(MondayService):
         return None
 
 
-# --- pure field-mapping helpers (Cadence field values -> monday column_values) ---
+# --- pure field-mapping helpers (risr/crm field values -> monday column_values) ---
 def _find_status_col(meta: list[dict]) -> dict | None:
     status_cols = [c for c in meta if c.get("type") == "status"]
     for c in status_cols:  # prefer a column literally titled "Status"
@@ -251,7 +251,7 @@ def _closest_label(col: dict, wanted) -> str | None:
 
 
 def build_column_values(board, *, status_label=None, priority_label=None, notes=None) -> dict:
-    """Build a monday `column_values` dict for a board from Cadence field values,
+    """Build a monday `column_values` dict for a board from risr/crm field values,
     targeting the right column ids and only sending labels the board actually has."""
     meta = getattr(board, "columns_meta", None) or []
     out: dict = {}

@@ -44,12 +44,12 @@ Each issue keeps its own AI state so navigating away/back is consistent (store k
 **Solve ticket with AI** (Support tickets — the primary action):
 1. Click "Solve ticket with AI" → **running** ("Diagnosing the ticket, writing a fix and opening a
    PR…").
-2. `POST /api/ai/tickets/{key}/solve` → **solved**: green banner "Cadence AI opened PR #834 with a
+2. `POST /api/ai/tickets/{key}/solve` → **solved**: green banner "risr/crm AI opened PR #834 with a
    fix", a "What it changed" summary + file chips, and the AI PR in the Development section. One click,
    end-to-end.
 
-**Cadence AI slide-over** (global assistant):
-- Opens from sidebar "Cadence AI", top-bar "Ask AI", dashboard AI buttons.
+**risr/crm AI slide-over** (global assistant):
+- Opens from sidebar "risr/crm AI", top-bar "Ask AI", dashboard AI buttons.
 - Suggestion chip or Enter → **busy** ("Analyzing your workspace…") → `POST /api/ai/assistant` →
   **done** (titled bullet list + Copy / Create report). Idle state shows an empty prompt.
 - Closes on scrim click or the ✕.

@@ -130,7 +130,7 @@ class MockAiService(AiService):
         summ = self.summarize(issue)
         pr = self.create_pr(db, issue)
         summary = (
-            f"Cadence AI diagnosed {issue.key}: {summ.summary} Opened PR #{pr.num} on "
+            f"risr/crm AI diagnosed {issue.key}: {summ.summary} Opened PR #{pr.num} on "
             f"`{pr.branch}` with the fix and a regression test."
         )
         return Solved(pr=pr, summary=summary, files=summ.files)

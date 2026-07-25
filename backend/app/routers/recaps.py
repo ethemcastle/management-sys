@@ -208,7 +208,7 @@ def _member_for_owner(db: Session, owner: str) -> TeamMember | None:
 
 
 def _ticket_from_item(db: Session, recap: MeetingNote, item: dict) -> Issue:
-    """Create one Cadence task from a recap next step, assigned to its owner."""
+    """Create one risr/crm task from a recap next step, assigned to its owner."""
     owner = (item.get("owner") or "").strip()
     title = (item.get("title") or "Follow-up").strip()
     detail = (item.get("detail") or "").strip()
@@ -314,7 +314,7 @@ def simulate(db: Session = Depends(get_db)) -> MeetingNoteOut:
 def action_item_to_ticket(
     recap_id: int, payload: RecapActionRef, db: Session = Depends(get_db)
 ) -> IssueOut:
-    """Turn a recap's next step into a Cadence ticket, assigned to its owner."""
+    """Turn a recap's next step into a risr/crm ticket, assigned to its owner."""
     recap = db.get(MeetingNote, recap_id)
     if recap is None:
         raise HTTPException(status_code=404, detail="Recap not found")

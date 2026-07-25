@@ -87,7 +87,7 @@ class LiveMondayService(MockMondayService):
             # No/failed connection → keep whatever we have (or the mock seed).
             return super().import_boards(db)
 
-        # Preserve soft links to Cadence issues across a re-sync.
+        # Preserve soft links to risr/crm issues across a re-sync.
         links = {
             item_id: key
             for item_id, key in db.execute(
@@ -185,7 +185,7 @@ class LiveMondayService(MockMondayService):
     def _columns(self, columns: list[dict]) -> list[dict]:
         """Every non-empty column on the item as {title, text, type, color?} — the
         full data snapshot, stored so EVERY monday field is readable verbatim inside
-        Cadence (status/priority carry a colour so they render as coloured pills)."""
+        risr/crm (status/priority carry a colour so they render as coloured pills)."""
         out: list[dict] = []
         for c in columns:
             text = (c.get("text") or "").strip()

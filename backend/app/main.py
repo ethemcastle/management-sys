@@ -1,4 +1,4 @@
-"""Cadence API — FastAPI application entrypoint."""
+"""risr/crm API — FastAPI application entrypoint."""
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Cadence API",
+    title="risr/crm API",
     version="0.1.0",
     description="Jira-class task manager for software teams — GitHub + AI integrations.",
     lifespan=lifespan,

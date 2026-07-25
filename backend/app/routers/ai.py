@@ -62,7 +62,7 @@ def _open_pr(db: Session, issue: Issue, ai: AiService, github: GitHubService) ->
 
 
 def _mirror_pr(db: Session, issue: Issue, real: dict) -> PullRequest:
-    """Reflect a real GitHub PR into a Cadence PullRequest row so the issue's PR
+    """Reflect a real GitHub PR into a risr/crm PullRequest row so the issue's PR
     badge and the ticket-code-linked panel agree. Also removes any previously
     fabricated mock PRs for this issue (num in the mock range) so real and mock
     PRs never pile up on the same ticket."""
@@ -139,7 +139,7 @@ def solve_ticket(
     summ = ai.summarize(issue)
     pr = _open_pr(db, issue, ai, github)
     summary = (
-        f"Cadence AI diagnosed {issue.key}: {summ.summary} "
+        f"risr/crm AI diagnosed {issue.key}: {summ.summary} "
         f"Opened PR #{pr.num} on `{pr.branch}` with the change."
     )
     db.commit()
@@ -177,7 +177,7 @@ def answer_comment(
     repo = gh.get_repo(db) if gh is not None else None
     answer = codegen.answer_question(issue, payload.question, gh, repo)
 
-    # AI comments render via a synthetic "Cadence AI" author (kind="ai"); the stored
+    # AI comments render via a synthetic "risr/crm AI" author (kind="ai"); the stored
     # author_initials just satisfies the FK.
     author = db.scalars(select(TeamMember).where(TeamMember.is_current_user.is_(True))).first()
     if author is None:

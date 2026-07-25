@@ -57,7 +57,7 @@ class Issue(Base):
     monday_board_id: Mapped[str | None] = mapped_column(String(48), nullable=True)
     monday_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # The item's REAL monday status label + colour (kept as-is, not collapsed into
-    # Cadence's 5 statuses) so the UI can show "Stuck"/"Not Started"/etc. verbatim.
+    # risr/crm's 5 statuses) so the UI can show "Stuck"/"Not Started"/etc. verbatim.
     monday_status: Mapped[str | None] = mapped_column(String(80), nullable=True)
     monday_status_color: Mapped[str | None] = mapped_column(String(9), nullable=True)
     # Every monday column on the item, verbatim: [{title, text, type, color?}] —
