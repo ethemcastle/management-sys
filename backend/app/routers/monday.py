@@ -56,7 +56,22 @@ _STATUS_MAP: dict[str, tuple[Status, bool]] = {
     "On Hold": (Status.todo, True),
     "Not Started": (Status.todo, False),
     "Waiting": (Status.todo, False),
+    "Backlog": (Status.backlog, False),
 }
+
+
+def _map_status(label: str | None) -> tuple[Status, bool]:
+    """monday status label -> (risr/crm status, blocked). Case-insensitive; a
+    'Backlog' label (or any unmapped/empty one) resolves to the backlog."""
+    if not label:
+        return (Status.backlog, False)
+    if label in _STATUS_MAP:
+        return _STATUS_MAP[label]
+    low = label.strip().lower()
+    for known, mapped in _STATUS_MAP.items():
+        if known.lower() == low:
+            return mapped
+    return (Status.backlog, False)
 
 
 def _account(db: Session) -> MondayAccount:
@@ -215,13 +230,16 @@ def _ticket_from_item(
     """Create a risr/crm ticket mirroring a monday item; link it back and audit.
     The ticket's Product is set to the board name so it's categorised (sidebar
     sections + category pages) exactly the way monday groups it into boards."""
-    status, blocked = _STATUS_MAP.get(item.status_label or "", (Status.backlog, False))
+    status, blocked = _map_status(item.status_label)
     # Only adopt the owner as assignee if it maps to a real risr/crm member.
     assignee = item.owner_initials if item.owner_initials and db.get(TeamMember, item.owner_initials) else None
     priority = _priority_from_columns(item.columns)
     board_name = board.name if board else "monday.com"
-    # Land monday items in the active sprint so they show on the (sprint-filtered) Board.
+    # Route by status: a Backlog item is unscheduled (it belongs in the Backlog, not
+    # the sprint board); any other status lands in the active sprint so it shows on
+    # the (sprint-filtered) Board.
     active = db.scalars(select(Sprint).where(Sprint.active.is_(True))).first()
+    sprint_id = None if status == Status.backlog else (active.id if active else None)
     key = _next_issue_key(db, Space.features)
     issue = Issue(
         key=key,
@@ -235,7 +253,7 @@ def _ticket_from_item(
         blocked=blocked,
         assignee_initials=assignee,
         product=board_name,
-        sprint_id=active.id if active else None,
+        sprint_id=sprint_id,
         labels=["monday"],
         comment_count=0,
         # Keep monday's real status label/colour + every field verbatim.
@@ -275,12 +293,21 @@ def _auto_import(db: Session) -> int:
 
 def _apply_monday_to_issue(db: Session, issue: Issue, item: MondayItem, board_name: str) -> bool:
     """Overwrite a linked ticket's SHARED fields from monday (monday wins), only
-    where they differ. risr/crm-only fields (points/sprint/epic/PR/AI/audit) untouched."""
+    where they differ. risr/crm-only fields (points/epic/PR/AI/audit) untouched;
+    sprint placement follows the status so a Backlog item lands in the Backlog."""
     changed = False
-    status, blocked = _STATUS_MAP.get(item.status_label or "", (Status.backlog, False))
+    status, blocked = _map_status(item.status_label)
     if item.status_label and issue.status != status:
         issue.status = status
         changed = True
+        # Keep board/backlog placement in step with the monday status: a Backlog
+        # status parks the ticket in the Backlog (unscheduled); any other status
+        # returns it to the active sprint so it appears on the board.
+        if status == Status.backlog:
+            issue.sprint_id = None
+        elif issue.sprint_id is None:
+            active = db.scalars(select(Sprint).where(Sprint.active.is_(True))).first()
+            issue.sprint_id = active.id if active else None
     if item.status_label and issue.blocked != blocked:
         issue.blocked = blocked
         changed = True
