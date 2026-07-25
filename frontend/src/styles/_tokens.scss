@@ -1,0 +1,74 @@
+// Design tokens — HIGH fidelity, from 04_DESIGN_TOKENS.md.
+// Components must reference these custom properties; never hardcode hex.
+// Toggle themes by setting data-theme="light|dark" on <html>.
+
+:root,
+[data-theme='light'] {
+  --bg: #f4f4f1;
+  --surface: #ffffff;
+  --surface-2: #f0f0ec;
+  --surface-3: #e7e7e1;
+  --border: #e5e4df;
+  --border-2: #d4d3cc;
+  --text: #191917;
+  --text-2: #63625b;
+  --text-3: #95948b;
+  --accent: #5a50e1;
+  --accent-fg: #ffffff;
+  --ai: #b45af2;
+  --success: #2e9e5b;
+  --success-soft: #e4f3eb;
+  --warning: #c0820a;
+  --warning-soft: #f6efdc;
+  --danger: #d95340;
+  --danger-soft: #f9e9e6;
+  --info: #3b7dd8;
+  --info-soft: #e7f0fb;
+  --radius: 12px;
+  --pad: 16px;
+  // derived accents
+  --accent-soft: color-mix(in oklab, var(--accent) 12%, transparent);
+  --accent-line: color-mix(in oklab, var(--accent) 30%, transparent);
+  --ai-soft: color-mix(in oklab, var(--ai) 9%, transparent);
+  --ai-line: color-mix(in oklab, var(--ai) 26%, transparent);
+}
+
+[data-theme='dark'] {
+  --bg: #0c0d10;
+  --surface: #141519;
+  --surface-2: #1c1d22;
+  --surface-3: #25262c;
+  --border: #26272e;
+  --border-2: #35363e;
+  --text: #ececee;
+  --text-2: #9e9ea6;
+  --text-3: #6b6c74;
+  --accent: #7e77ff;
+  --accent-fg: #ffffff;
+  --ai: #c77dff;
+  --success: #43b26e;
+  --success-soft: #132a1e;
+  --warning: #d9a23c;
+  --warning-soft: #2a2113;
+  --danger: #e86a56;
+  --danger-soft: #2e1a17;
+  --info: #5a9beb;
+  --info-soft: #132133;
+  --accent-soft: color-mix(in oklab, var(--accent) 22%, transparent);
+  --accent-line: color-mix(in oklab, var(--accent) 42%, transparent);
+  --ai-soft: color-mix(in oklab, var(--ai) 16%, transparent);
+  --ai-line: color-mix(in oklab, var(--ai) 34%, transparent);
+}
+
+// Layout constants (from 04 · Spacing / shape)
+:root {
+  --sidebar-w: 252px;
+  --topbar-h: 56px;
+  --rail-w: 344px;
+  --col-w: 300px;
+  --font-ui: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-lift: 0 4px 14px rgba(0, 0, 0, 0.07);
+  --shadow-pop: 0 10px 40px rgba(0, 0, 0, 0.16);
+}

@@ -1,0 +1,287 @@
+@if (data(); as d) {
+  <!-- ============ DEVELOPER ============ -->
+  @if (d.role === 'developer' && dev(); as dv) {
+    <div class="view home" style="max-width: 1220px">
+      <header class="hhead">
+        <div>
+          <div class="eyebrow">{{ today }}</div>
+          <h1 class="h1">{{ greeting }}, {{ firstName() }}</h1>
+        </div>
+        @if (ws.activeSprint(); as s) {
+          <div class="sprint-chip">
+            <span class="gdot"></span>
+            <div class="sc-text">
+              <b>{{ s.name }}</b>
+              <span>{{ s.daysLeft }} days left · {{ s.range }}</span>
+            </div>
+          </div>
+        }
+      </header>
+
+      <!-- Needs you: one ranked action queue -->
+      <section class="card card-pad needs">
+        <div class="sec-head">
+          <span class="sec-title">Needs you</span>
+          <span class="count-mono">{{ dv.actionItems.length }}</span>
+          <span class="spacer"></span>
+          <button class="icon-btn" title="Refresh" (click)="regenerate()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 5v6h-6" /></svg>
+          </button>
+          @if (monday.connected()) {
+            <button class="mini msync" [disabled]="monday.syncing()" (click)="syncMonday()">
+              <span class="mdot"></span>
+              {{ monday.syncing() ? 'Syncing…' : (dv.monday.pendingCount ? dv.monday.pendingCount + ' to sync' : 'Synced ' + monday.lastSyncedLabel()) }}
+            </button>
+          }
+        </div>
+        <div class="rows">
+          @for (a of dv.actionItems; track a.issue.key) {
+            <app-action-row [item]="a" (open)="go($event)" (unblock)="resolveBlocked($event)" (sync)="syncMonday()" />
+          } @empty {
+            <div class="empty-line clear">You're all clear — nothing needs you right now.</div>
+          }
+        </div>
+      </section>
+
+      <div class="grid dev">
+        <div class="col">
+          <!-- Your work (grouped by status, monday + CI inline) -->
+          <section class="card card-pad">
+            <div class="sec-head">
+              <span class="sec-title">Your work</span>
+              <span class="count-mono">{{ dv.myFocus.length }}</span>
+              <span class="spacer"></span>
+              <span class="muted">Assigned to you</span>
+            </div>
+            @for (g of workGroups(); track g.label) {
+              <div class="wgroup">
+                <div class="wg-head">{{ g.label }} <span class="wg-n">{{ g.items.length }}</span></div>
+                <div class="rows">
+                  @for (i of g.items; track i.key) {
+                    <div class="frow" (click)="go(i.key)">
+                      <app-type-badge [type]="i.type" [size]="17" />
+                      <span class="key">{{ i.key }}</span>
+                      <span class="title">{{ i.title }}</span>
+                      @if (i.blocked) { <app-blocked-pill /> }
+                      <span class="spacer"></span>
+                      @if (i.mondayStatus) { <app-monday-status [label]="i.mondayStatus" [color]="i.mondayStatusColor ?? null" /> }
+                      @if (i.pr) { <app-ci-dot [status]="i.pr.checks" /> }
+                      <app-priority-bars [priority]="i.priority" />
+                      <span class="pts">{{ i.points }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-line">Nothing assigned — nice and clear.</div>
+            }
+          </section>
+
+          <!-- Review requests -->
+          <section class="card card-pad">
+            <div class="sec-head">
+              <span class="sec-title">Review requests</span>
+              <span class="count-mono">{{ dv.reviewQueue.length }}</span>
+            </div>
+            <div class="rows">
+              @for (i of dv.reviewQueue; track i.key) {
+                <div class="rrow">
+                  <app-avatar [member]="i.assignee" [size]="26" [rounded]="8" />
+                  <div class="rr-main">
+                    <span class="rr-title">{{ i.title }}</span>
+                    <span class="rr-sub">{{ i.key }} · {{ i.assignee?.name }}</span>
+                  </div>
+                  @if (i.pr) {
+                    <span class="rr-pr">
+                      <span class="mono">#{{ i.pr.num }}</span>
+                      <app-ci-dot [status]="i.pr.checks" />
+                    </span>
+                  }
+                  <button class="btn btn-accent-soft rev" (click)="go(i.key)">Review</button>
+                </div>
+              } @empty {
+                <div class="empty-line">No pending reviews.</div>
+              }
+            </div>
+          </section>
+        </div>
+
+        <div class="col">
+          <!-- Standup (AI) -->
+          <section class="card aicard">
+            <div class="ai-head">
+              <span class="ai-tile">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+              </span>
+              <div class="ai-titles">
+                <span class="ai-name">Your standup</span>
+                <span class="ai-by">Drafted by Cadence AI</span>
+              </div>
+              <button class="icon-btn" title="Regenerate" (click)="regenerate()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 5v6h-6" /></svg>
+              </button>
+            </div>
+            <ul class="ai-bullets">
+              @for (b of dv.standup; track $index) { <li>{{ b }}</li> }
+            </ul>
+            <div class="ai-actions">
+              <button class="mini" (click)="copyStandup()">Copy</button>
+              <button class="mini">Post to Slack</button>
+            </div>
+          </section>
+
+          <!-- Your PRs -->
+          <section class="card card-pad">
+            <div class="sec-head"><span class="sec-title">Your pull requests</span></div>
+            <div class="rows">
+              @for (i of dv.myPrs; track i.key) {
+                @if (i.pr; as pr) {
+                  <div class="prrow" (click)="go(i.key)">
+                    <span class="pstate" [style.background]="prMeta[pr.state].color" [title]="prMeta[pr.state].label"></span>
+                    <div class="pr-main">
+                      <span class="pr-title">{{ pr.title }}</span>
+                      <span class="pr-branch mono">{{ prBranch(pr) }}</span>
+                    </div>
+                    <span class="pr-num mono">#{{ pr.num }}</span>
+                    <app-ci-dot [status]="pr.checks" />
+                  </div>
+                }
+              } @empty {
+                <div class="empty-line">No open pull requests.</div>
+              }
+            </div>
+          </section>
+
+          <!-- Sprint health mini -->
+          <section class="card card-pad">
+            <div class="sec-head"><span class="sec-title">{{ ws.activeSprint()?.name }}</span></div>
+            <div class="mini-health">
+              <div class="mh-num">
+                <span class="big mono">{{ dv.sprintHealth.remaining }}</span>
+                <span class="mh-lbl">points remaining · {{ dv.sprintHealth.committed }} committed</span>
+              </div>
+              <div class="segbar">
+                @for (s of healthSegments(dv.sprintHealth); track s.label) {
+                  <span [style.width.%]="s.pct" [style.background]="s.color"></span>
+                }
+              </div>
+              <div class="legend">
+                @for (s of healthSegments(dv.sprintHealth); track s.label) {
+                  <span class="leg"><span class="ld" [style.background]="s.color"></span>{{ s.label }} {{ s.value }}</span>
+                }
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============ PRODUCT OWNER ============ -->
+  @if (d.role === 'product_owner' && po(); as p) {
+    <div class="view home" style="max-width: 1220px">
+      <header class="hhead">
+        <div>
+          <div class="eyebrow">{{ ws.activeSprint()?.name }} · {{ ws.spaceInfo()?.name }}</div>
+          <h1 class="h1">{{ ws.activeSprint()?.goal }}</h1>
+        </div>
+        @if (p.sprintHealth.onTrack) { <span class="ontrack">On track</span> }
+        @else { <span class="ontrack risk">At risk</span> }
+      </header>
+
+      <div class="grid po">
+        <!-- Sprint health wide -->
+        <section class="card card-pad health-wide">
+          <div class="sec-head"><span class="sec-title">Sprint health</span></div>
+          <div class="metrics">
+            <div class="metric"><span class="m-num mono">{{ p.sprintHealth.committed }}</span><span class="m-lbl">Committed</span></div>
+            <div class="metric"><span class="m-num mono" style="color: var(--success)">{{ p.sprintHealth.done }}</span><span class="m-lbl">Completed</span></div>
+            <div class="metric"><span class="m-num mono">{{ p.sprintHealth.remaining }}</span><span class="m-lbl">Remaining</span></div>
+            <div class="metric"><span class="m-num mono" style="color: var(--warning)">+{{ p.sprintHealth.scopeAdded }}</span><span class="m-lbl">Scope added</span></div>
+          </div>
+          <div class="segbar big">
+            @for (s of healthSegments(p.sprintHealth); track s.label) {
+              <span [style.width.%]="s.pct" [style.background]="s.color"></span>
+            }
+          </div>
+          <div class="legend">
+            @for (s of healthSegments(p.sprintHealth); track s.label) {
+              <span class="leg"><span class="ld" [style.background]="s.color"></span>{{ s.label }} {{ s.value }}</span>
+            }
+          </div>
+        </section>
+
+        <!-- Weekly report AI -->
+        <section class="card aicard weekly">
+          <div class="ai-head">
+            <span class="ai-tile"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg></span>
+            <div class="ai-titles"><span class="ai-name">Weekly report</span><span class="ai-by">Drafted by Cadence AI</span></div>
+          </div>
+          <p class="weekly-body">{{ p.weeklyReport }}</p>
+          <button class="btn btn-ai-soft" (click)="openReport()">Generate full report</button>
+        </section>
+
+        <!-- Risks -->
+        <section class="card card-pad risks">
+          <div class="sec-head"><span class="sec-title">Risks flagged by AI</span><span class="count-mono">{{ p.risks.length }}</span></div>
+          <div class="rows">
+            @for (r of p.risks; track r.issue.key) {
+              <div class="risk-row" (click)="go(r.issue.key)">
+                <app-type-badge [type]="r.issue.type" [size]="17" />
+                <span class="key">{{ r.issue.key }}</span>
+                <span class="title">{{ r.issue.title }}</span>
+                <span class="spacer"></span>
+                <span class="reason">{{ r.reason }}</span>
+                <app-avatar [member]="r.issue.assignee" [size]="22" [rounded]="7" />
+              </div>
+            } @empty {
+              <div class="empty-line">No risks — sprint looks healthy.</div>
+            }
+          </div>
+        </section>
+
+        <!-- Workload -->
+        <section class="card card-pad workload">
+          <div class="sec-head"><span class="sec-title">Team workload</span></div>
+          <div class="wl-rows">
+            @for (w of p.workload; track w.member.initials) {
+              <div class="wl">
+                <span class="wl-av" [style.background]="w.member.color">{{ w.member.initials }}</span>
+                <span class="wl-name">{{ w.member.name }}</span>
+                <app-progress-bar
+                  class="wl-bar"
+                  [value]="w.points"
+                  [max]="18"
+                  [height]="8"
+                  [color]="w.overloaded ? 'var(--danger)' : 'var(--accent)'"
+                />
+                <span class="wl-pts mono" [class.over]="w.overloaded">{{ w.points }}</span>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Epic progress full width -->
+        <section class="card card-pad epics">
+          <div class="sec-head">
+            <span class="sec-title">Epic progress</span>
+            <span class="spacer"></span>
+            <a class="viewlink" (click)="go(p.epicProgress[0]?.key)">View roadmap</a>
+          </div>
+          <div class="ep-rows">
+            @for (e of p.epicProgress; track e.key) {
+              <div class="ep" (click)="go(e.key)">
+                <span class="ep-dot" [style.background]="e.color"></span>
+                <span class="ep-name">{{ e.title }}</span>
+                <app-progress-bar class="ep-bar" [value]="e.done" [max]="e.total || 1" [height]="8" [color]="e.color" />
+                <span class="ep-pts mono">{{ e.done }}/{{ e.total }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+} @else {
+  <div class="view" style="max-width: 1220px"><div class="empty-line">Loading dashboard…</div></div>
+}

@@ -1,0 +1,127 @@
+<div class="view monday" style="max-width: 1180px">
+  @if (data(); as d) {
+    <header class="hhead">
+      <div>
+        <div class="eyebrow">Workspace</div>
+        <h1 class="h1">monday.com</h1>
+      </div>
+      @if (d.account.connected) {
+        <div class="conn">
+          <span class="mdots"><i></i><i></i><i></i></span>
+          <span class="cacct">{{ d.account.accountName }}</span>
+          <button class="mini primary" [disabled]="refreshing()" (click)="refresh()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [class.spin]="refreshing()">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v5h-5" /></svg>
+            {{ refreshing() ? 'Refreshing…' : 'Refresh' }}
+          </button>
+          <button class="mini" (click)="disconnect()">Disconnect</button>
+        </div>
+      }
+    </header>
+
+    @if (!d.account.connected) {
+      <!-- Connect empty state -->
+      <section class="connect-card">
+        <div class="m-ico"><span class="mdots big"><i></i><i></i><i></i></span></div>
+        <h2>Connect monday.com</h2>
+        <p>
+          Pull your monday.com boards into Cadence. Every item is imported <b>automatically</b>
+          as a real Cadence ticket, and each board shows up here — and in the sidebar — organised
+          just like it is in monday.
+        </p>
+        <button class="btn btn-accent connect-btn" [disabled]="connecting()" (click)="connect()">
+          @if (connecting()) {
+            <span class="sp"></span> Connecting…
+          } @else {
+            <span class="mdots sm"><i></i><i></i><i></i></span>
+            Connect &amp; import
+          }
+        </button>
+        <span class="mock-note">Mock connection — no real monday.com account required.</span>
+      </section>
+    } @else {
+      <!-- Summary bar -->
+      <div class="mbar">
+        <span class="stat"><b>{{ boards().length }}</b> boards</span>
+        <span class="dot">·</span>
+        <span class="stat"><b>{{ totalItems() }}</b> items</span>
+        <span class="dot">·</span>
+        <span class="stat imported"><b>{{ importedCount() }}</b> imported as tickets</span>
+        <span class="spacer"></span>
+        <span class="hint">Each board is also a category in the sidebar under <b>Products</b></span>
+      </div>
+
+      <!-- One kanban per board, columns = monday groups -->
+      @for (b of boards(); track b.id) {
+        <section class="board card">
+          <div class="bhead">
+            <div class="btitle">
+              @if (b.url) {
+                <a class="bname link" [href]="b.url" target="_blank" rel="noopener" [title]="'Open ' + b.name + ' in monday.com'">{{ b.name }}</a>
+              } @else {
+                <span class="bname">{{ b.name }}</span>
+              }
+              <span class="bkind" [class.priv]="b.kind !== 'public'">{{ b.kind }}</span>
+            </div>
+            <a class="bcat" [routerLink]="['/category/product', b.name]">Open {{ b.itemCount }} tickets →</a>
+          </div>
+          @if (b.description) { <p class="bdesc">{{ b.description }}</p> }
+
+          <div class="kanban">
+            @for (col of b.columns; track col.title) {
+              <div class="kcol">
+                <div class="khead"><span class="ktitle">{{ col.title }}</span><span class="kn">{{ col.items.length }}</span></div>
+                <div class="kcards">
+                  @for (it of col.items; track it.id) {
+                    <div class="kcard">
+                      <div class="kc-top">
+                        @if (it.statusLabel) {
+                          <span class="status" [style.background]="(it.statusColor || '#c4c4c4') + '22'"
+                            [style.color]="it.statusColor || 'var(--text-2)'">
+                            <span class="sdot" [style.background]="it.statusColor || '#c4c4c4'"></span>{{ it.statusLabel }}
+                          </span>
+                        } @else {
+                          <span class="status none">—</span>
+                        }
+                        @if (it.owner; as o) {
+                          <span class="oav" [style.background]="o.color" [title]="o.name">{{ o.initials }}</span>
+                        }
+                      </div>
+                      <span class="kc-name" [title]="it.name">{{ it.name }}</span>
+                      @if (extraFields(it).length) {
+                        <div class="kc-fields">
+                          @for (f of extraFields(it); track f.title) {
+                            <div class="fld"><span class="fk">{{ f.title }}</span><span class="fv">{{ f.value }}</span></div>
+                          }
+                        </div>
+                      }
+                      <div class="kc-foot">
+                        @if (it.issueKey) {
+                          <a class="cadkey" [routerLink]="['/issues', it.issueKey]" [title]="'Open ' + it.issueKey + ' in Cadence'">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                            {{ it.issueKey }}
+                          </a>
+                        } @else {
+                          <span class="cadkey pending">not imported</span>
+                        }
+                        <span class="spacer"></span>
+                        @if (it.url) {
+                          <a class="mext" [href]="it.url" target="_blank" rel="noopener" title="Open in monday.com">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5h5v5" /><path d="M19 5l-8 8" /><path d="M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4" /></svg>
+                          </a>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    }
+  } @else {
+    <div class="muted load">Loading monday.com…</div>
+  }
+</div>

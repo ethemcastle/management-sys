@@ -1,0 +1,19 @@
+@if (ws.loaded()) {
+  <div class="shell">
+    <app-sidebar />
+    <main class="main">
+      <app-top-bar />
+      <div class="viewport">
+        <router-outlet />
+      </div>
+    </main>
+  </div>
+  <app-ai-panel />
+  <app-new-issue-modal />
+  <app-toast-host />
+} @else {
+  <div class="boot">
+    <span class="bspin"></span>
+    <span>Loading Cadence…</span>
+  </div>
+}

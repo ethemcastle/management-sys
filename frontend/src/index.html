@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>Cadence</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <script>
+    // Apply persisted theme/accent/radius before first paint to avoid a flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('cadence.theme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        var a = localStorage.getItem('cadence.accent');
+        if (a) document.documentElement.style.setProperty('--accent', a);
+        var r = localStorage.getItem('cadence.radius');
+        if (r) document.documentElement.style.setProperty('--radius', r + 'px');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <app-root></app-root>
+  <!-- Ybug code start (https://ybug.io) — file feedback about Cadence → becomes a ticket -->
+  <script type="text/javascript">
+    (function () {
+      window.ybug_settings = { "id": "8m648avjdpy3zzvf7v67" };
+      var ybug = document.createElement('script'); ybug.type = 'text/javascript'; ybug.async = true;
+      ybug.src = 'https://widget.ybug.io/button/' + window.ybug_settings.id + '.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ybug, s);
+    })();
+  </script>
+  <!-- Ybug code end -->
+</body>
+</html>

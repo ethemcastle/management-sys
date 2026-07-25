@@ -1,0 +1,554 @@
+@if (issue(); as iss) {
+  <div class="detail">
+    <div class="main">
+      <!-- Header -->
+      <div class="topline">
+        <button class="back" (click)="back()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+          Back
+        </button>
+        <span class="crumb">{{ iss.space === 'features' ? 'Features' : 'Product Support' }} / {{ iss.key }}</span>
+        <span class="spacer"></span>
+        @if (!iss.branch) {
+          <button class="btn" (click)="createBranch()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4" /><circle cx="6" cy="18" r="2.4" /><circle cx="18" cy="7.5" r="2.4" /><path d="M6 8.4v7.2" /><path d="M18 10v2a4 4 0 0 1-4 4H8.4" /></svg>
+            Create branch
+          </button>
+        }
+        <div class="more">
+          <button class="icon-btn" title="More" (click)="toggleMenu()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" /></svg>
+          </button>
+          @if (menuOpen()) {
+            <div class="menu-scrim" (click)="menuOpen.set(false)"></div>
+            <div class="menu">
+              <button class="menu-item danger" (click)="deleteIssue()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12" /></svg>
+                Delete issue
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="idrow">
+        <app-type-badge [type]="iss.type" [size]="20" />
+        <span class="idkey">{{ iss.key }}</span>
+        @if (iss.blocked) { <app-blocked-pill /> }
+        @if (iss.mondayItemId) {
+          @if (iss.mondayStatus) {
+            <app-monday-status [label]="iss.mondayStatus" [color]="iss.mondayStatusColor ?? null" />
+          }
+          <app-monday-badge [state]="iss.syncState ?? 'synced'" />
+          @if (monday.itemUrl(iss.mondayBoardId, iss.mondayItemId); as mu) {
+            <a class="mlink" [href]="mu" target="_blank" rel="noopener">open in monday ↗</a>
+          }
+        }
+      </div>
+      <h1 class="ititle">{{ iss.title }}</h1>
+
+      <div class="metapills">
+        <app-status-pill [status]="iss.status" />
+        <span class="pill">
+          <app-priority-bars [priority]="iss.priority" />
+          {{ priorityMeta[iss.priority].label }}
+        </span>
+        <span class="pill mono">{{ iss.points }} pts</span>
+        @if (iss.feature; as f) {
+          <span class="pill feature" [style.color]="f.color || 'var(--accent)'" (click)="go(f.key)">
+            <span class="fdot" [style.background]="f.color || 'var(--accent)'"></span>{{ f.title }}
+          </span>
+        }
+      </div>
+
+      <!-- Tasks (feature/epic only) -->
+      @if (isFeature() && iss.children; as kids) {
+        <section class="card card-pad tasks">
+          <div class="sec-head">
+            <span class="sec-title">Tasks</span>
+            @if (iss.childProgress; as cp) {
+              <span class="count-mono">{{ cp.done }}/{{ cp.total }} done</span>
+            }
+            <span class="spacer"></span>
+            <button class="mini" (click)="startAddTask()">+ Add task</button>
+          </div>
+          @if (iss.childProgress; as cp) {
+            <app-progress-bar [value]="cp.done" [max]="cp.total || 1" [height]="8" />
+          }
+          <div class="task-rows">
+            @for (c of kids; track c.key) {
+              <div class="task" (click)="go(c.key)">
+                <span class="check" [class.done]="c.status === 'done'">
+                  @if (c.status === 'done') {
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4 4 10-10" /></svg>
+                  }
+                </span>
+                <app-type-badge [type]="c.type" [size]="16" />
+                <span class="tkey">{{ c.key }}</span>
+                <span class="ttitle">{{ c.title }}</span>
+                <span class="spacer"></span>
+                <app-status-pill [status]="c.status" />
+                <span class="tpts mono">{{ c.points }}</span>
+              </div>
+            }
+            @if (addingTask()) {
+              <input
+                class="task-add-input"
+                autofocus
+                placeholder="Task title…"
+                [value]="taskTitle()"
+                (input)="onTaskInput($event)"
+                (keydown.enter)="submitTask()"
+                (keydown.escape)="cancelAddTask()"
+                (blur)="submitTask()"
+              />
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Cadence AI card -->
+      <section class="card aibox">
+        <div class="ai-head">
+          <span class="ai-tile"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg></span>
+          <div class="ai-titles"><span class="ai-name">Cadence AI</span><span class="ai-by">Context-aware assistant</span></div>
+        </div>
+
+        @switch (aiState().phase) {
+          @case ('summarizing') {
+            <app-thinking-dots [message]="'Reading ' + iss.commentCount + ' comments and the linked PR'" />
+          }
+          @case ('creating') {
+            <app-thinking-dots message="Writing the fix and opening a pull request" />
+          }
+          @case ('solving') {
+            <app-thinking-dots message="Diagnosing the ticket, writing a fix and opening a PR" />
+          }
+          @case ('summarized') {
+            <ul class="ai-bullets">
+              @for (b of aiState().bullets; track $index) { <li>{{ b }}</li> }
+            </ul>
+            @if (aiState().resolution; as r) {
+              <div class="resolution">
+                <div class="res-label">Suggested resolution</div>
+                <p>{{ r.summary }}</p>
+                <div class="files">
+                  @for (f of r.files; track f) { <span class="filechip mono">{{ f }}</span> }
+                </div>
+              </div>
+            }
+            <button class="btn btn-ai" (click)="createPr()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+              Create PR with this fix
+            </button>
+          }
+          @case ('done') {
+            <div class="success">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M8.5 12.3l2.4 2.4 4.6-5" /></svg>
+              <div>
+                <div class="s-title">{{ aiState().changeSummary }}</div>
+                <div class="s-sub">Review it in the Development section below before merging.</div>
+              </div>
+            </div>
+            @if (aiState().files.length) {
+              <div class="files">
+                @for (f of aiState().files; track f) { <span class="filechip mono">{{ f }}</span> }
+              </div>
+            }
+          }
+          @default {
+            @if (isSupport()) {
+              <div class="ai-actions">
+                <button class="btn btn-ai" (click)="solve()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+                  Solve ticket with AI
+                </button>
+                <button class="btn btn-ai-soft" (click)="summarize()">Summarize thread</button>
+              </div>
+              <p class="ai-note">Cadence AI diagnoses the ticket, writes the fix, and opens a pull request for review.</p>
+            } @else {
+              <button class="btn btn-ai" (click)="summarize()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+                Summarize thread
+              </button>
+            }
+          }
+        }
+      </section>
+
+      <!-- Description -->
+      @if (iss.description.length) {
+        <section class="card card-pad desc">
+          <div class="sec-head"><span class="sec-title">Description</span></div>
+          @for (b of iss.description; track $index) {
+            @switch (b.type) {
+              @case ('heading') { <h3>{{ b.text }}</h3> }
+              @case ('list') {
+                <ul>@for (it of b.items; track $index) { <li>{{ it }}</li> }</ul>
+              }
+              @case ('image') {
+                @if (b.url) {
+                  <a class="desc-shot" [href]="b.url" target="_blank" rel="noopener">
+                    <img [src]="b.url" [alt]="b.text || 'Screenshot'" loading="lazy" />
+                  </a>
+                }
+              }
+              @case ('link') {
+                @if (b.url) {
+                  <p><a [href]="b.url" target="_blank" rel="noopener">{{ b.text }}</a></p>
+                }
+              }
+              @default { <p>{{ b.text }}</p> }
+            }
+          }
+        </section>
+      }
+
+      <!-- monday.com fields (every field from monday, verbatim) -->
+      @if (iss.mondayFields?.length) {
+        <section class="card card-pad mfields">
+          <div class="sec-head">
+            <span class="mdots"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="6" cy="12" r="2.5" fill="#ff3d57" /><circle cx="12" cy="12" r="2.5" fill="#ffcb00" />
+              <circle cx="18" cy="12" r="2.5" fill="#00c875" /></svg></span>
+            <span class="sec-title">monday.com fields</span>
+          </div>
+          <div class="mf-grid">
+            @for (f of iss.mondayFields; track f.title) {
+              <div class="mf-row">
+                <span class="mf-k">{{ f.title }}</span>
+                @if (f.type === 'status' || f.type === 'color') {
+                  <span class="mf-pill" [style.background]="(f.color || '#c4c4c4') + '22'" [style.color]="f.color || 'var(--text-2)'">
+                    <span class="mf-dot" [style.background]="f.color || '#c4c4c4'"></span>{{ f.value }}
+                  </span>
+                } @else {
+                  <span class="mf-v">{{ f.value }}</span>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Development (GitHub) -->
+      <section class="card card-pad dev">
+        <div class="sec-head">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.36 1.09 2.94.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.9-1.29 2.74-1.02 2.74-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z" /></svg>
+          <span class="sec-title">Development</span>
+          <span class="spacer"></span>
+          @if (ghRepo()?.connected) {
+            <a class="gh-repo mono ghlink" [href]="repoUrl()" target="_blank" rel="noopener" title="Open repository on GitHub">{{ ghRepo()?.fullName }}</a>
+            <button class="gh-disc" (click)="syncGithub()" [disabled]="syncingGh()">
+              {{ syncingGh() ? 'Syncing…' : 'Sync' }}
+            </button>
+            <button class="gh-disc" (click)="disconnectGithub()">Disconnect</button>
+          }
+        </div>
+
+        @if (ghRepo()?.connected) {
+          <!-- Connected: branches & PRs auto-matched to this ticket by its code -->
+          <div class="gh-note">
+            Linked by ticket code <span class="mono key">{{ iss.key }}</span> ·
+            {{ ghBranches().length }} branch{{ ghBranches().length === 1 ? '' : 'es' }},
+            {{ ghPrs().length }} PR{{ ghPrs().length === 1 ? '' : 's' }}
+          </div>
+
+          @for (b of ghBranches(); track b.name) {
+            <div class="branch-line gh">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4" /><circle cx="6" cy="18" r="2.4" /><circle cx="18" cy="7.5" r="2.4" /><path d="M6 8.4v7.2" /><path d="M18 10v2a4 4 0 0 1-4 4H8.4" /></svg>
+              <a class="mono bn ghlink" [href]="branchUrl(b.name)" target="_blank" rel="noopener" title="Open branch on GitHub">{{ b.name }}</a>
+              <span class="ab mono">+{{ b.ahead }} −{{ b.behind }}</span>
+              @if (b.author) { <app-avatar [member]="b.author" [size]="18" [rounded]="6" /> }
+            </div>
+          }
+
+          @for (pr of ghPrs(); track pr.num) {
+            <div class="pr-block">
+              <div class="pr-top">
+                <a class="pr-link" [href]="prUrl(pr.num)" target="_blank" rel="noopener" title="Open PR on GitHub">
+                  <span class="pr-num mono">#{{ pr.num }}</span>
+                  <span class="pr-title">{{ pr.title }}</span>
+                  <svg class="ext" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5h5v5" /><path d="M19 5l-8 8" /><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" /></svg>
+                </a>
+                <span class="pr-state" [style.color]="prMeta[pr.state].color" [style.background]="'color-mix(in oklab,' + prMeta[pr.state].color + ' 12%, transparent)'">{{ prMeta[pr.state].label }}</span>
+                @if (pr.aiGenerated) { <span class="ai-tag">AI</span> }
+              </div>
+              <div class="pr-stats mono">
+                <span>{{ pr.branch }}</span>
+                <span class="add">+{{ pr.additions }}</span>
+                <span class="del">−{{ pr.deletions }}</span>
+                <span>{{ pr.filesChanged }} files</span>
+              </div>
+              <div class="checks">
+                @for (chk of pr.checksDetail; track chk.name) {
+                  <div class="check-item">
+                    <app-ci-dot [status]="chk.status" />
+                    <span class="cname">{{ chk.name }}</span>
+                    <span class="cstatus" [style.color]="ciMeta[chk.status].color">{{ ciMeta[chk.status].label }}</span>
+                  </div>
+                }
+                @if (!pr.checksDetail.length) {
+                  <div class="check-item nochk">No status checks on this PR</div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (!ghBranches().length && !ghPrs().length) {
+            <div class="gh-empty">
+              No branches or PRs reference <span class="mono">{{ iss.key }}</span> yet. Name a branch
+              <span class="mono">…/{{ iss.key.toLowerCase() }}-…</span> and it links automatically.
+            </div>
+          }
+        } @else {
+          <!-- Not connected: local branch/PR data + a connect prompt -->
+          @if (iss.branch) {
+            <div class="branch-line">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4" /><circle cx="6" cy="18" r="2.4" /><circle cx="18" cy="7.5" r="2.4" /><path d="M6 8.4v7.2" /><path d="M18 10v2a4 4 0 0 1-4 4H8.4" /></svg>
+              <span class="mono bn">{{ iss.branch }}</span>
+              <span class="frm">from main</span>
+            </div>
+          } @else {
+            <button class="btn create-b" (click)="createBranch()">Create branch from this issue</button>
+          }
+
+          @for (pr of iss.prs; track pr.num) {
+            <div class="pr-block">
+              <div class="pr-top">
+                <span class="pr-num mono">#{{ pr.num }}</span>
+                <span class="pr-title">{{ pr.title }}</span>
+                <span class="pr-state" [style.color]="prMeta[pr.state].color" [style.background]="'color-mix(in oklab,' + prMeta[pr.state].color + ' 12%, transparent)'">{{ prMeta[pr.state].label }}</span>
+                @if (pr.aiGenerated) { <span class="ai-tag">AI</span> }
+              </div>
+              <div class="pr-stats mono">
+                <span>{{ pr.branch }}</span>
+                <span class="add">+{{ pr.additions }}</span>
+                <span class="del">−{{ pr.deletions }}</span>
+                <span>{{ pr.filesChanged }} files</span>
+              </div>
+              <div class="checks">
+                @for (chk of ciChecks(pr); track chk.name) {
+                  <div class="check-item">
+                    <app-ci-dot [status]="chk.status" />
+                    <span class="cname">{{ chk.name }}</span>
+                    <span class="cstatus" [style.color]="ciMeta[chk.status].color">{{ ciMeta[chk.status].label }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="gh-connect">
+            <div class="gc-text">
+              <b>Connect a GitHub repository</b>
+              <span>Cadence identifies branches &amp; PRs for each ticket by its code (e.g. <span class="mono">{{ iss.key }}</span>).</span>
+            </div>
+            <div class="gc-row">
+              <input class="gc-input mono" [value]="repoInput()" (input)="onRepoInput($event)" placeholder="owner/repo" />
+              <button class="btn btn-accent" [disabled]="connectingGh()" (click)="connectGithub()">
+                {{ connectingGh() ? 'Connecting…' : 'Connect' }}
+              </button>
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Activity -->
+      <section class="card card-pad activity">
+        <div class="sec-head"><span class="sec-title">Activity</span></div>
+        <div class="acts">
+          @for (c of iss.comments; track c.id) {
+            @if (c.kind === 'commit') {
+              <div class="commit">
+                <span class="commit-ico">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2" /><path d="M2 12h6.8M15.2 12H22" /></svg>
+                </span>
+                <span class="commit-txt"><b>{{ c.author.name }}</b> {{ c.body }}</span>
+                <span class="ctime">{{ time(c.createdAt) }}</span>
+              </div>
+            } @else if (c.kind === 'ai') {
+              <div class="comment ai-comment">
+                <span class="ai-ava">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+                </span>
+                <div class="cbody">
+                  <div class="chead"><b>Cadence AI</b><span class="ai-tag">AI</span><span class="ctime">{{ time(c.createdAt) }}</span></div>
+                  <p>{{ c.body }}</p>
+                </div>
+              </div>
+            } @else {
+              <div class="comment">
+                <app-avatar [member]="c.author" [size]="30" [rounded]="9" />
+                <div class="cbody">
+                  <div class="chead"><b>{{ c.author.name }}</b><span class="ctime">{{ time(c.createdAt) }}</span></div>
+                  <p>{{ c.body }}</p>
+                </div>
+              </div>
+            }
+          }
+          @if (aiThinking()) {
+            <div class="comment ai-comment">
+              <span class="ai-ava">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+              </span>
+              <div class="cbody"><app-thinking-dots message="Cadence AI is researching the code" /></div>
+            </div>
+          }
+        </div>
+        <div class="composer">
+          <app-avatar [member]="ws.currentUser()" [size]="30" [rounded]="9" />
+          <div class="composer-input">
+            <textarea #composerTa placeholder="Add a comment…  (type @ to mention someone or @ai)"
+              [value]="commentText()" (input)="onComment($event)" (keydown.escape)="mentionOpen.set(false)"></textarea>
+            @if (mentionOpen() && mentionMatches().length) {
+              <div class="mention-pop">
+                @for (m of mentionMatches(); track m.initials) {
+                  <button class="mention-opt" (mousedown)="$event.preventDefault(); insertMention(m)">
+                    @if (m.isAi) {
+                      <span class="m-ai"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg></span>
+                    } @else {
+                      <span class="m-av" [style.background]="m.color">{{ m.initials }}</span>
+                    }
+                    <span class="m-name">{{ m.name }}</span>
+                    @if (m.isAi) { <span class="m-hint">researches the code</span> }
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <button class="btn btn-accent" [disabled]="!commentText().trim()" (click)="submitComment()">Comment</button>
+        </div>
+      </section>
+
+      <!-- Audit log -->
+      @if (iss.auditLog.length) {
+        <section class="card card-pad audit">
+          <div class="sec-head"><span class="sec-title">Audit log</span></div>
+          <div class="audit-list">
+            @for (a of iss.auditLog; track a.id) {
+              <div class="audit-row">
+                @if (a.actor) { <app-avatar [member]="a.actor" [size]="22" [rounded]="6" /> }
+                @else { <span class="audit-sys">C</span> }
+                <span class="audit-txt"><b>{{ a.actor?.name || 'System' }}</b> {{ a.summary }}</span>
+                <span class="ctime">{{ time(a.createdAt) }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    </div>
+
+    <!-- Right rail -->
+    <aside class="rail">
+      <section class="card card-pad">
+        <div class="rail-title">Information</div>
+        <div class="info-stack">
+          <div class="info-field">
+            <label>Status</label>
+            <select class="ifin" (change)="setStatus($event)">
+              @for (s of STATUSES; track s) { <option [value]="s" [selected]="iss.status === s">{{ statusMeta[s].label }}</option> }
+            </select>
+          </div>
+          <div class="info-field">
+            <label>Dev (assignee)</label>
+            <select class="ifin" (change)="setAssignee($event)">
+              <option value="" [selected]="!iss.assignee">Unassigned</option>
+              @for (m of ws.members(); track m.initials) { <option [value]="m.initials" [selected]="iss.assignee?.initials === m.initials">{{ m.name }}</option> }
+            </select>
+          </div>
+          <div class="info-field">
+            <label>Owner</label>
+            <select class="ifin" (change)="setOwner($event)">
+              <option value="" [selected]="!iss.owner">Unassigned</option>
+              @for (m of ws.members(); track m.initials) { <option [value]="m.initials" [selected]="iss.owner?.initials === m.initials">{{ m.name }}</option> }
+            </select>
+          </div>
+          <div class="info-field">
+            <label>Reporter</label>
+            <div class="ifval"><app-avatar [member]="ws.currentUser()" [size]="20" [rounded]="6" /> {{ ws.currentUser()?.name }}</div>
+          </div>
+          <div class="info-field">
+            <label>Priority</label>
+            <select class="ifin" (change)="setPriority($event)">
+              @for (p of PRIORITIES; track p) { <option [value]="p" [selected]="iss.priority === p">{{ priorityMeta[p].label }}</option> }
+            </select>
+          </div>
+          <div class="info-field">
+            <label>Points</label>
+            <input class="ifin" type="number" min="0" [value]="iss.points" (change)="setPoints($event)" />
+          </div>
+          <div class="info-field">
+            <label>Type</label>
+            <div class="ifval"><app-type-badge [type]="iss.type" [size]="16" /> {{ cap(iss.type) }}</div>
+          </div>
+          <div class="info-field">
+            <label>Product</label>
+            <app-combobox [options]="ws.productOptions()" [value]="iss.product" placeholder="—" (changed)="setProduct($event)" />
+          </div>
+          <div class="info-field">
+            <label>Component</label>
+            <app-combobox [options]="ws.componentOptions()" [value]="iss.component" placeholder="—" (changed)="setComponent($event)" />
+          </div>
+          <div class="info-field">
+            <label>Task ID</label>
+            <div class="ifval">
+              @if (iss.taskId) { <span class="taskid mono">{{ iss.taskId }}</span> } @else { <span class="imuted">—</span> }
+            </div>
+          </div>
+          <div class="info-field">
+            <label>Sprint</label>
+            <select class="ifin" (change)="setSprint($event)">
+              <option value="" [selected]="!iss.sprint">No sprint</option>
+              @for (s of ws.sprints(); track s.id) { <option [value]="s.id" [selected]="iss.sprint === s.id">{{ s.name }}</option> }
+            </select>
+          </div>
+          <div class="info-field">
+            <label>Epic</label>
+            <div class="ifval">
+              @if (iss.feature; as f) { <span class="ichip clk" [style.color]="f.color || 'var(--accent)'" (click)="go(f.key)">{{ f.title }}</span> } @else { <span class="imuted">—</span> }
+            </div>
+          </div>
+          <div class="info-field">
+            <label>Target Release</label>
+            <div class="rel-field">
+              @for (r of iss.targetRelease; track r) { <span class="ichip">{{ r }}<button class="chipx" (click)="removeRelease(r)" aria-label="Remove">×</button></span> }
+              <app-combobox class="rel-add" [options]="ws.releaseOptions()" [value]="null" placeholder="+ Add" [clearable]="false" (changed)="addRelease($event)" />
+            </div>
+          </div>
+          <div class="info-field">
+            <label>Blocked</label>
+            <div class="ifval"><button class="toggle-btn" [class.on]="iss.blocked" (click)="toggleBlocked()">{{ iss.blocked ? 'Blocked' : 'Not blocked' }}</button></div>
+          </div>
+          <div class="info-field">
+            <label>Labels</label>
+            <div class="ifval labels">
+              @for (l of iss.labels; track l.name) { <app-label-chip [label]="l" /> }
+              @if (!iss.labels.length) { <span class="imuted">None</span> }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      @if (iss.pr; as pr) {
+        <section class="card card-pad">
+          <div class="rail-title">Reviewers <span class="req">Request</span></div>
+          <div class="reviewers">
+            @for (r of pr.reviewers; track r.member.initials) {
+              <div class="reviewer">
+                <app-avatar [member]="r.member" [size]="24" [rounded]="7" />
+                <span class="rv-name">{{ r.member.name }}</span>
+                <span class="rv-state" [style.color]="reviewMeta[r.state].color">{{ reviewMeta[r.state].label }}</span>
+              </div>
+            } @empty {
+              <span class="muted">No reviewers yet.</span>
+            }
+          </div>
+        </section>
+      }
+    </aside>
+  </div>
+} @else {
+  <div class="view"><div class="loadline">Loading issue…</div></div>
+}

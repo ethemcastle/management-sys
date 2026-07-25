@@ -1,0 +1,68 @@
+<div class="board">
+  <!-- sub-header -->
+  <div class="subhead">
+    <button class="sprint-chip">
+      <span class="gdot"></span>
+      <span class="sname">{{ ws.activeSprint()?.name ?? 'Board' }}</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+    </button>
+    <span class="meta">{{ meta() }}</span>
+    <div class="avatars">
+      @for (m of headerAvatars(); track m.initials) {
+        <span class="av" [style.background]="m.color" [title]="m.name">{{ m.initials }}</span>
+      }
+    </div>
+    <span class="group-by">Group: <b>Status</b></span>
+  </div>
+
+  <!-- columns -->
+  <div class="cols" cdkDropListGroup>
+    @for (col of columns(); track col.key) {
+      <section class="col">
+        <div class="col-head">
+          <span class="dot" [style.background]="statusMeta[col.key].color"></span>
+          <span class="title">{{ col.title }}</span>
+          <span class="cnt">{{ col.issues.length }}</span>
+          <span class="wip" [class.over]="over(col)">
+            @if (col.wipLimit > 0) { WIP {{ col.issues.length }} / {{ col.wipLimit }} }
+            @else { WIP {{ col.issues.length }} }
+          </span>
+        </div>
+
+        <div
+          class="body"
+          [class.dragover]="dragOver() === col.key"
+          cdkDropList
+          [cdkDropListData]="col.issues"
+          (cdkDropListDropped)="drop($event, col.key)"
+          (cdkDropListEntered)="dragOver.set(col.key)"
+          (cdkDropListExited)="dragOver.set(null)"
+        >
+          @for (i of col.issues; track i.key) {
+            <div class="drag" cdkDrag>
+              <app-issue-card [issue]="i" (open)="go($event)" />
+              <div class="ph" *cdkDragPlaceholder></div>
+            </div>
+          } @empty {
+            <div class="col-empty">No issues</div>
+          }
+          @if (adding() === col.key) {
+            <input
+              class="add-input"
+              autofocus
+              placeholder="Issue title…"
+              [value]="addTitle()"
+              (input)="onAddInput($event)"
+              (keydown.enter)="submitAdd(col.key)"
+              (keydown.escape)="cancelAdd()"
+              (blur)="submitAdd(col.key)"
+            />
+          } @else {
+            <button class="add" (click)="startAdd(col.key)">+ Add issue</button>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</div>

@@ -1,0 +1,153 @@
+<div class="view inbox" style="max-width: 1180px">
+  @if (inbox(); as inb) {
+    <header class="hhead">
+      <div>
+        <div class="eyebrow">Workspace</div>
+        <h1 class="h1">Inbox</h1>
+      </div>
+      <span class="unread-badge">{{ inb.unread }} unread</span>
+    </header>
+
+    <!-- Recap (AI) -->
+    <section class="card aibox">
+      <div class="ai-head">
+        <span class="ai-tile">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+        </span>
+        <div class="ai-titles">
+          <span class="ai-name">Inbox recap</span>
+          <span class="ai-by">Drafted by Cadence AI · skips ignored types</span>
+        </div>
+        @if (recapPhase() === 'done') {
+          <button class="icon-btn" (click)="doRecap()" title="Regenerate">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 5v6h-6" /></svg>
+          </button>
+        }
+      </div>
+
+      @switch (recapPhase()) {
+        @case ('busy') { <app-thinking-dots message="Reading your inbox" /> }
+        @case ('done') {
+          @if (recap(); as r) {
+            <ul class="ai-bullets">
+              @for (b of r.bullets; track $index) { <li>{{ b }}</li> }
+            </ul>
+            <div class="recap-groups">
+              @for (g of r.groups; track g.category) {
+                <span class="rg" [style.color]="catMeta[g.category].color"
+                  [style.background]="softFill(catMeta[g.category].color, 12)">{{ g.count }} {{ g.label }}</span>
+              }
+            </div>
+            <div class="ai-actions"><button class="mini" (click)="copyRecap()">Copy</button></div>
+          }
+        }
+        @default {
+          <p class="ai-note">Summarize what's in your inbox, grouped by type — ignored types are skipped.</p>
+          <button class="btn btn-ai" (click)="doRecap()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" /></svg>
+            Recap inbox
+          </button>
+        }
+      }
+    </section>
+
+    <!-- Filters -->
+    <div class="filterbar">
+      <button class="chip" [class.on]="activeCategory() === null" (click)="setCategory(null)">
+        All <span class="n">{{ total() }}</span>
+      </button>
+      @for (b of inb.categories; track b.category) {
+        <button class="chip" [class.on]="activeCategory() === b.category" (click)="setCategory(b.category)">
+          <span class="cdot" [style.background]="b.color"></span>{{ b.label }} <span class="n">{{ b.count }}</span>
+        </button>
+      }
+      <span class="spacer"></span>
+      <button class="chip toggle" [class.on]="showIgnored()" (click)="toggleIgnored()">
+        Show ignored <span class="n">{{ inb.ignoredCount }}</span>
+      </button>
+      <button class="chip toggle" [class.on]="showRules()" (click)="toggleRules()">
+        Ignore rules <span class="n">{{ rules().length }}</span>
+      </button>
+    </div>
+
+    <!-- Ignore rules -->
+    @if (showRules()) {
+      <section class="card card-pad rules cad-fade">
+        <div class="sec-head">
+          <span class="sec-title">Ignore rules</span>
+          <span class="muted">Matching emails are skipped in the recap and muted in the list.</span>
+        </div>
+        <div class="rule-list">
+          @for (r of rules(); track r.id) {
+            <div class="rule">
+              <span class="rf">{{ fieldLabel[r.field] }}</span>
+              <span class="rv mono">{{ r.value }}</span>
+              <span class="rm">{{ r.matched }} matched</span>
+              <button class="x" (click)="removeRule(r.id)" title="Remove">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+              </button>
+            </div>
+          } @empty {
+            <div class="muted">No rules yet — add one below to hide noisy email types.</div>
+          }
+        </div>
+        <div class="add-rule">
+          <select (change)="onField($event)">
+            @for (f of fields; track f) {
+              <option [value]="f" [selected]="addField() === f">{{ fieldLabel[f] }}</option>
+            }
+          </select>
+          @if (addField() === 'category') {
+            <select (change)="onValue($event)">
+              <option value="">Choose type…</option>
+              @for (c of categories; track c) { <option [value]="c">{{ catMeta[c].label }}</option> }
+            </select>
+          } @else {
+            <input type="text" [value]="addValue()" (input)="onValue($event)"
+              [placeholder]="addField() === 'domain' ? 'example.com' : addField() === 'sender' ? 'name@example.com' : 'keyword'" />
+          }
+          <button class="btn btn-accent" (click)="addRule()">Add rule</button>
+        </div>
+      </section>
+    }
+
+    <!-- Email list -->
+    <section class="card list">
+      @for (e of inb.emails; track e.id) {
+        <div class="erow" [class.unread]="e.unread" [class.ignored]="e.ignored"
+          [class.sel]="selectedId() === e.id" (click)="select(e)">
+          <span class="udot" [class.on]="e.unread"></span>
+          <span class="eav" [style.background]="e.senderColor">{{ senderInitials(e.senderName) }}</span>
+          <div class="emain">
+            <div class="etop">
+              <span class="esender">{{ e.senderName }}</span>
+              <span class="ecat" [style.color]="catMeta[e.category].color"
+                [style.background]="softFill(catMeta[e.category].color, 12)">{{ catMeta[e.category].label }}</span>
+              @if (e.ignored) { <span class="ign">Ignored</span> }
+              <span class="spacer"></span>
+              <span class="etime">{{ rel(e.receivedAt) }}</span>
+            </div>
+            <div class="esubject">{{ e.subject }}</div>
+            <div class="epreview">{{ e.preview }}</div>
+            @if (selectedId() === e.id && selectedEmail(); as d) {
+              <div class="ebody cad-fade">{{ d.body }}</div>
+            }
+            @if (e.labels.length) {
+              <div class="elabels">
+                @for (l of e.labels; track l) { <span class="elabel">{{ l }}</span> }
+              </div>
+            }
+          </div>
+          <div class="eactions">
+            <button class="ea" (click)="ignoreCategory(e, $event)" title="Ignore this type of email">Ignore type</button>
+            <button class="ea" (click)="ignoreSender(e, $event)" title="Ignore this sender">Ignore sender</button>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">No emails to show{{ showIgnored() ? '' : ' — try “Show ignored”' }}.</div>
+      }
+    </section>
+  } @else {
+    <div class="muted load">Loading inbox…</div>
+  }
+</div>

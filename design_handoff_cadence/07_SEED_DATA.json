@@ -1,0 +1,65 @@
+{
+  "_comment": "Exact seed data from the Cadence design prototype. Use it verbatim to build DB fixtures / mock API responses so the implemented app matches the design 1:1. Keys, statuses, points, PRs and relationships are all meaningful.",
+
+  "currentUser": "AL",
+
+  "teamMembers": [
+    { "initials": "AL", "name": "Alex Rivera", "color": "#0E7C86", "role": "developer", "isCurrentUser": true },
+    { "initials": "AR", "name": "Aria Rahman", "color": "#E8833A", "role": "developer" },
+    { "initials": "JC", "name": "Jonas Cole",  "color": "#2E9E5B", "role": "developer" },
+    { "initials": "MP", "name": "Mira Patel",  "color": "#5A50E1", "role": "product_owner" },
+    { "initials": "DK", "name": "Daz Kim",     "color": "#D95340", "role": "developer" },
+    { "initials": "SL", "name": "Sena Liu",    "color": "#B45AF2", "role": "developer" },
+    { "initials": "TB", "name": "Theo Brandt", "color": "#3B7DD8", "role": "developer" }
+  ],
+
+  "spaces": [
+    { "id": "features", "name": "Features", "sub": "Product development", "kind": "product" },
+    { "id": "support",  "name": "Product Support", "sub": "Customer issues", "kind": "support" }
+  ],
+
+  "sprints": [
+    { "id": "s24", "name": "Sprint 24", "range": "Jul 1 – 14", "daysLeft": 6, "daysTotal": 10, "goal": "Onboarding v2 & billing stability", "active": true, "capacity": 45 },
+    { "id": "s25", "name": "Sprint 25", "range": "Jul 15 – 28", "daysLeft": null, "daysTotal": 10, "goal": "", "active": false, "capacity": 40 }
+  ],
+
+  "labels": {
+    "frontend": "#3B7DD8", "backend": "#2E9E5B", "api": "#B45AF2", "infra": "#E8833A",
+    "design": "#D95340", "urgent": "#D95340", "mobile": "#0E7C86", "docs": "#9A998F"
+  },
+
+  "features": [
+    { "key": "CAD-100", "title": "Onboarding revamp",     "color": "#5A50E1", "space": "features", "status": "inprogress", "assignee": "MP", "priority": 2 },
+    { "key": "CAD-120", "title": "Billing v2",            "color": "#2E9E5B", "space": "features", "status": "inprogress", "assignee": "MP", "priority": 2 },
+    { "key": "CAD-130", "title": "Realtime sync",         "color": "#B45AF2", "space": "features", "status": "inprogress", "assignee": "MP", "priority": 2 },
+    { "key": "CAD-105", "title": "Platform hardening",    "color": "#E8833A", "space": "features", "status": "inprogress", "assignee": "MP", "priority": 2 },
+    { "key": "CAD-135", "title": "Search infra",          "color": "#3B7DD8", "space": "features", "status": "todo",       "assignee": "MP", "priority": 1 },
+    { "key": "CAD-190", "title": "Mobile parity",         "color": "#D9A23C", "space": "features", "status": "todo",       "assignee": "MP", "priority": 1 }
+  ],
+
+  "issues": [
+    { "key": "CAD-142", "type": "story", "priority": 3, "status": "inprogress", "assignee": "AR", "points": 5, "feature": "CAD-100", "sprint": "s24", "space": "features", "branch": "feat/onboarding-stepper", "pr": { "num": 812, "state": "open", "checks": "passing", "title": "Redesign onboarding checklist stepper" }, "reviewRequested": true, "comments": 6, "title": "Redesign onboarding checklist stepper", "labels": ["frontend", "design"] },
+    { "key": "CAD-138", "type": "bug", "priority": 3, "status": "inprogress", "assignee": "JC", "points": 3, "feature": "CAD-120", "sprint": "s24", "space": "features", "branch": "fix/billing-webhook", "pr": { "num": 814, "state": "open", "checks": "failing", "title": "Guard against duplicate invoice creation" }, "comments": 9, "title": "Billing webhook retries create duplicate invoices", "labels": ["backend", "urgent"] },
+    { "key": "CAD-129", "type": "story", "priority": 2, "status": "inprogress", "assignee": "SL", "points": 8, "feature": "CAD-130", "sprint": "s24", "space": "features", "branch": "feat/realtime-cursors", "pr": { "num": 808, "state": "draft", "checks": "pending", "title": "Realtime cursors in shared documents" }, "comments": 4, "title": "Realtime cursors in shared documents", "labels": ["frontend", "backend"] },
+    { "key": "CAD-155", "type": "task", "priority": 2, "status": "todo", "assignee": "AL", "points": 5, "feature": "CAD-105", "sprint": "s24", "space": "features", "comments": 2, "title": "Add rate limiting to public API endpoints", "labels": ["api", "backend"] },
+    { "key": "CAD-149", "type": "bug", "priority": 2, "status": "review", "assignee": "AL", "points": 3, "feature": "CAD-135", "sprint": "s24", "space": "features", "branch": "fix/search-stale", "pr": { "num": 810, "state": "open", "checks": "passing", "title": "Invalidate search cache on document edit" }, "comments": 5, "title": "Search returns stale results after edit", "labels": ["backend"] },
+    { "key": "CAD-160", "type": "story", "priority": 1, "status": "todo", "assignee": "AR", "points": 3, "feature": null, "sprint": "s24", "space": "features", "comments": 1, "title": "Slack notifications for @mentions", "labels": ["backend"] },
+    { "key": "CAD-133", "type": "story", "priority": 2, "status": "review", "assignee": "JC", "points": 5, "feature": "CAD-100", "sprint": "s24", "space": "features", "branch": "feat/sample-templates", "pr": { "num": 809, "state": "open", "checks": "passing", "title": "Ship sample project templates" }, "reviewRequested": true, "comments": 3, "title": "Onboarding: sample project templates", "labels": ["frontend"] },
+    { "key": "CAD-162", "type": "task", "priority": 2, "status": "todo", "assignee": "TB", "points": 8, "feature": "CAD-105", "sprint": "s24", "space": "features", "blocked": true, "comments": 0, "title": "Migrate auth to httpOnly session cookies", "labels": ["backend", "infra"] },
+    { "key": "CAD-145", "type": "bug", "priority": 1, "status": "done", "assignee": "AL", "points": 2, "feature": "CAD-105", "sprint": "s24", "space": "features", "branch": "fix/tz-due", "pr": { "num": 805, "state": "merged", "checks": "passing", "title": "Fix off-by-one in due date timezone" }, "comments": 2, "title": "Timezone off-by-one in due dates", "labels": ["backend"] },
+    { "key": "CAD-140", "type": "story", "priority": 2, "status": "done", "assignee": "JC", "points": 5, "feature": "CAD-120", "sprint": "s24", "space": "features", "branch": "feat/proration", "pr": { "num": 801, "state": "merged", "checks": "passing", "title": "Proration on plan change" }, "comments": 7, "title": "Billing: proration on plan change", "labels": ["backend"] },
+    { "key": "CAD-158", "type": "task", "priority": 1, "status": "done", "assignee": "SL", "points": 3, "feature": null, "sprint": "s24", "space": "features", "branch": "chore/dark-audit", "pr": { "num": 806, "state": "merged", "checks": "passing", "title": "Dark mode audit for board view" }, "comments": 1, "title": "Dark mode audit for board view", "labels": ["design", "frontend"] },
+    { "key": "CAD-168", "type": "bug", "priority": 1, "status": "todo", "assignee": "AL", "points": 2, "feature": null, "sprint": "s24", "space": "features", "comments": 0, "title": "Board card drops on wrong column at 4K", "labels": ["frontend"] },
+    { "key": "CAD-166", "type": "story", "priority": 2, "status": "backlog", "assignee": "TB", "points": 5, "feature": "CAD-135", "sprint": "s25", "space": "features", "comments": 0, "title": "Command palette for global search", "labels": ["frontend"] },
+    { "key": "CAD-171", "type": "story", "priority": 1, "status": "backlog", "assignee": null, "points": 5, "feature": null, "sprint": "s25", "space": "features", "comments": 0, "title": "Saved filters and shared team views", "labels": ["frontend"] },
+    { "key": "CAD-172", "type": "story", "priority": 2, "status": "backlog", "assignee": "SL", "points": 8, "feature": "CAD-190", "sprint": null, "space": "features", "comments": 0, "title": "Mobile: offline draft sync", "labels": ["mobile"] },
+    { "key": "CAD-173", "type": "task", "priority": 1, "status": "backlog", "assignee": null, "points": 3, "feature": null, "sprint": null, "space": "features", "comments": 0, "title": "Bulk edit in list view", "labels": ["frontend"] },
+    { "key": "CAD-175", "type": "story", "priority": 2, "status": "backlog", "assignee": null, "points": 13, "feature": "CAD-130", "sprint": null, "space": "features", "comments": 0, "title": "Presence and typing indicators everywhere", "labels": ["frontend", "backend"] },
+
+    { "key": "SUP-402", "type": "bug", "priority": 3, "status": "inprogress", "assignee": "DK", "points": 3, "feature": null, "sprint": null, "space": "support", "branch": "fix/csv-export", "pr": { "num": 815, "state": "open", "checks": "pending", "title": "Stream CSV export for large datasets" }, "comments": 4, "title": "Customer cannot export CSV over 10k rows", "labels": ["backend"] },
+    { "key": "SUP-398", "type": "task", "priority": 3, "status": "review", "assignee": "JC", "points": 2, "feature": null, "sprint": null, "space": "support", "branch": "fix/login-500", "pr": { "num": 813, "state": "open", "checks": "passing", "title": "Handle null session on /login" }, "reviewRequested": true, "comments": 8, "title": "Investigate elevated 500s on /login", "labels": ["backend", "urgent"] },
+    { "key": "SUP-410", "type": "bug", "priority": 3, "status": "todo", "assignee": "TB", "points": 5, "feature": null, "sprint": null, "space": "support", "comments": 3, "title": "SSO login loop for Okta tenants", "labels": ["backend"] },
+    { "key": "SUP-405", "type": "task", "priority": 1, "status": "todo", "assignee": "MP", "points": 2, "feature": null, "sprint": null, "space": "support", "comments": 1, "title": "Refund workflow runbook for support team", "labels": ["docs"] },
+    { "key": "SUP-395", "type": "bug", "priority": 2, "status": "done", "assignee": "JC", "points": 2, "feature": null, "sprint": null, "space": "support", "branch": "fix/webhook-sig", "pr": { "num": 804, "state": "merged", "checks": "passing", "title": "Fix webhook signature v2 mismatch" }, "comments": 2, "title": "Webhook signature mismatch on v2 events", "labels": ["backend"] }
+  ]
+}

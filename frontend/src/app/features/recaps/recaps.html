@@ -1,0 +1,89 @@
+<section class="recaps">
+  <header class="rhead">
+    <div>
+      <h1>Meeting recaps</h1>
+      <p class="sub">Auto-captured from Gemini meeting notes · {{ store.source() }}</p>
+    </div>
+    <button class="btn" (click)="sync()" [disabled]="store.syncing()">
+      {{ store.syncing() ? 'Syncing…' : 'Sync' }}
+    </button>
+  </header>
+
+  @if (store.loading() && !store.recaps().length) {
+    <div class="empty">Loading recaps…</div>
+  } @else if (!store.recaps().length) {
+    <div class="empty">
+      No recaps yet. After a meeting, Gemini emails the notes and they'll appear here.
+    </div>
+  } @else {
+    <div class="list">
+      @for (r of store.recaps(); track r.id) {
+        <article class="card">
+          <div class="chead">
+            <div>
+              <h2>{{ r.title }}</h2>
+              <p class="date">{{ fmtDate(r.meetingDate) }}</p>
+            </div>
+            @if (r.attendees.length) {
+              <div class="avatars">
+                @for (a of r.attendees; track a) {
+                  <span class="avatar" [title]="a">{{ initials(a) }}</span>
+                }
+              </div>
+            }
+          </div>
+
+          @if (r.summary) {
+            <p class="summary">{{ r.summary }}</p>
+          }
+
+          @for (s of r.sections; track s.heading) {
+            <div class="section">
+              <h3>{{ s.heading }}</h3>
+              <p>{{ s.text }}</p>
+            </div>
+          }
+
+          @if (r.actionItems.length) {
+            <div class="steps">
+              <div class="steps-head">
+                <h3 class="steps-h">Next steps <span class="count">{{ r.actionItems.length }}</span></h3>
+                @if (createdAll().has(r.id)) {
+                  <span class="done">✓ Tickets created</span>
+                } @else {
+                  <button class="btn tiny" (click)="toAllTickets(r)" [disabled]="bulking() === r.id">
+                    {{ bulking() === r.id ? 'Creating…' : 'Create all → tickets' }}
+                  </button>
+                }
+              </div>
+              @for (it of r.actionItems; track $index) {
+                <div class="step">
+                  <div class="step-main">
+                    <div class="step-top">
+                      @if (isGroup(it.owner)) {
+                        <span class="owner group">The group</span>
+                      } @else {
+                        <span class="owner">{{ it.owner }}</span>
+                      }
+                      <span class="step-title">{{ it.title }}</span>
+                    </div>
+                    @if (it.detail) {
+                      <p class="step-detail">{{ it.detail }}</p>
+                    }
+                  </div>
+                  <button
+                    class="btn ghost"
+                    (click)="toTicket(r.id, $index, it.title)"
+                    [disabled]="creating() === tag(r.id, $index)"
+                  >
+                    {{ creating() === tag(r.id, $index) ? '…' : '→ Ticket' }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>
