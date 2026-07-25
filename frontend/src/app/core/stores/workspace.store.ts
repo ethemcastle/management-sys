@@ -25,6 +25,17 @@ function read(key: string, fallback: string): string {
   }
 }
 
+// One-time rebrand: flip any legacy (pre-risr) accent still saved in a browser to
+// the risr brand teal, so existing sessions stop showing the old purple. A genuine
+// custom pick that isn't one of the retired defaults is left untouched.
+const BRAND_ACCENT = '#1f5b73';
+const LEGACY_ACCENTS = ['#5A50E1', '#2E9E5B', '#0E7C86', '#D95340', '#C2410C'];
+function readAccent(): string {
+  const stored = read(LS.accent, '');
+  if (!stored || LEGACY_ACCENTS.includes(stored.toUpperCase())) return BRAND_ACCENT;
+  return stored;
+}
+
 /** Global workspace state: role, space, theme + the static bootstrap data. */
 @Injectable({ providedIn: 'root' })
 export class WorkspaceStore {
@@ -36,7 +47,7 @@ export class WorkspaceStore {
   readonly role = signal<Role>(read(LS.role, 'developer') as Role);
   readonly space = signal<Space>(read(LS.space, 'features') as Space);
   readonly theme = signal<Theme>(read(LS.theme, 'light') as Theme);
-  readonly accent = signal<string>(read(LS.accent, '#1f5b73'));
+  readonly accent = signal<string>(readAccent());
   readonly radius = signal<number>(Number(read(LS.radius, '12')));
   readonly density = signal<Density>(read(LS.density, 'comfortable') as Density);
 
