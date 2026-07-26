@@ -425,10 +425,12 @@ def build_dashboard_developer(db: Session, space: Space) -> DashboardDeveloper:
     my_focus = [i for i in issues if i.assignee_initials == me.initials and i.status != Status.done]
     my_focus.sort(key=lambda i: (-i.priority, i.key))
 
+    # "For you to review": tickets IN REVIEW where I'm a requested reviewer.
     review_queue = [
         i
         for i in issues
-        if i.pr is not None
+        if i.status == Status.review
+        and i.pr is not None
         and i.assignee_initials != me.initials
         and any(r.member_initials == me.initials for r in i.pr.reviewers)
     ]
