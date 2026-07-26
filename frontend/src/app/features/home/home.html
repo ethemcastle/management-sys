@@ -18,42 +18,53 @@
         }
       </header>
 
-      <!-- Needs you: one ranked action queue -->
+      <!-- Support tickets: the Product Support queue -->
       <section class="card card-pad needs">
         <div class="sec-head">
-          <span class="sec-title">Needs you</span>
-          <span class="count-mono">{{ dv.actionItems.length }}</span>
+          <span class="sec-title">Support tickets</span>
+          <span class="count-mono">{{ dv.supportTickets.length }}</span>
           <span class="spacer"></span>
+          <span class="muted">Product Support</span>
           <button class="icon-btn" title="Refresh" (click)="regenerate()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 5v6h-6" /></svg>
           </button>
-          @if (monday.connected()) {
-            <button class="mini msync" [disabled]="monday.syncing()" (click)="syncMonday()">
-              <span class="mdot"></span>
-              {{ monday.syncing() ? 'Syncing…' : (dv.monday.pendingCount ? dv.monday.pendingCount + ' to sync' : 'Synced ' + monday.lastSyncedLabel()) }}
-            </button>
-          }
         </div>
         <div class="rows">
-          @for (a of dv.actionItems; track a.issue.key) {
-            <app-action-row [item]="a" (open)="go($event)" (unblock)="resolveBlocked($event)" (sync)="syncMonday()" />
+          @for (i of dv.supportTickets; track i.key) {
+            <div class="frow" (click)="go(i.key)">
+              <app-type-badge [type]="i.type" [size]="17" />
+              <span class="key">{{ i.key }}</span>
+              <span class="title">{{ i.title }}</span>
+              @if (i.blocked) { <app-blocked-pill /> }
+              <span class="spacer"></span>
+              <app-status-pill [status]="i.status" />
+              @if (i.mondayStatus) { <app-monday-status [label]="i.mondayStatus" [color]="i.mondayStatusColor ?? null" /> }
+              <app-avatar [member]="i.assignee" [size]="22" [rounded]="7" />
+              <app-priority-bars [priority]="i.priority" />
+            </div>
           } @empty {
-            <div class="empty-line clear">You're all clear — nothing needs you right now.</div>
+            <div class="empty-line clear">No open support tickets right now.</div>
           }
         </div>
       </section>
 
       <div class="grid dev">
         <div class="col">
-          <!-- Your work (grouped by status, monday + CI inline) -->
+          <!-- Product planning (Features) grouped by status, monday + CI inline -->
           <section class="card card-pad">
             <div class="sec-head">
-              <span class="sec-title">Your work</span>
-              <span class="count-mono">{{ dv.myFocus.length }}</span>
+              <span class="sec-title">Product planning</span>
+              <span class="count-mono">{{ dv.productPlanning.length }}</span>
               <span class="spacer"></span>
-              <span class="muted">Assigned to you</span>
+              <span class="muted">Features</span>
+              @if (monday.connected()) {
+                <button class="mini msync" [disabled]="monday.syncing()" (click)="syncMonday()">
+                  <span class="mdot"></span>
+                  {{ monday.syncing() ? 'Syncing…' : (dv.monday.pendingCount ? dv.monday.pendingCount + ' to sync' : 'Synced ' + monday.lastSyncedLabel()) }}
+                </button>
+              }
             </div>
-            @for (g of workGroups(); track g.label) {
+            @for (g of planningGroups(); track g.label) {
               <div class="wgroup">
                 <div class="wg-head">{{ g.label }} <span class="wg-n">{{ g.items.length }}</span></div>
                 <div class="rows">
@@ -66,6 +77,7 @@
                       <span class="spacer"></span>
                       @if (i.mondayStatus) { <app-monday-status [label]="i.mondayStatus" [color]="i.mondayStatusColor ?? null" /> }
                       @if (i.pr) { <app-ci-dot [status]="i.pr.checks" /> }
+                      <app-avatar [member]="i.assignee" [size]="22" [rounded]="7" />
                       <app-priority-bars [priority]="i.priority" />
                       <span class="pts">{{ i.points }}</span>
                     </div>
@@ -73,7 +85,7 @@
                 </div>
               </div>
             } @empty {
-              <div class="empty-line">Nothing assigned — nice and clear.</div>
+              <div class="empty-line">No open features — nothing in planning.</div>
             }
           </section>
 

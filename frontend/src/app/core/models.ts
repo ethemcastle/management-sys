@@ -355,6 +355,8 @@ export interface DashboardDeveloper {
   blocked: Issue[];
   failingCi: Issue[];
   monday: MondaySummary;
+  supportTickets: Issue[];
+  productPlanning: Issue[];
 }
 
 export interface DashboardPo {

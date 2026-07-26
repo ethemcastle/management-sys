@@ -489,6 +489,16 @@ def build_dashboard_developer(db: Session, space: Space) -> DashboardDeveloper:
         default=None,
     )
 
+    # Home cards (cross-space): the Support-space queue + the Features-space
+    # product-planning list — open items, highest priority first.
+    def _open_sorted(sp: Space) -> list[Issue]:
+        items = [i for i in non_epic_issues(db, sp) if i.status != Status.done]
+        items.sort(key=lambda i: (-i.priority, i.key))
+        return items
+
+    support_tickets = _open_sorted(Space.support)
+    product_planning = _open_sorted(Space.features)
+
     return DashboardDeveloper(
         my_focus=[S.issue_out(i) for i in my_focus],
         review_queue=[S.issue_out(i) for i in review_queue],
@@ -499,6 +509,8 @@ def build_dashboard_developer(db: Session, space: Space) -> DashboardDeveloper:
         blocked=[S.issue_out(i) for i in blocked],
         failing_ci=[S.issue_out(i) for i in failing_ci],
         monday=MondaySummary(pending_count=len(unsynced), last_synced_at=last_synced),
+        support_tickets=[S.issue_out(i) for i in support_tickets],
+        product_planning=[S.issue_out(i) for i in product_planning],
     )
 
 

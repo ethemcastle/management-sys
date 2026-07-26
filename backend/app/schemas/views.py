@@ -175,6 +175,9 @@ class DashboardDeveloper(CamelModel):
     blocked: list[IssueOut] = []
     failing_ci: list[IssueOut] = []
     monday: MondaySummary = MondaySummary()
+    # Home cards: the Support-space queue + the Features-space product-planning list.
+    support_tickets: list[IssueOut] = []
+    product_planning: list[IssueOut] = []
 
 
 class DashboardPo(CamelModel):

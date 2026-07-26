@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { IssuesService } from '../../core/api/issues.service';
 import { ViewsService } from '../../core/api/views.service';
 import { Dashboard, Issue, PullRequest, SprintHealth, Status } from '../../core/models';
 import { CI_META, PR_STATE_META, STATUS_META } from '../../core/theme';
@@ -9,7 +8,6 @@ import { AiStore } from '../../core/stores/ai.store';
 import { MondayStore } from '../../core/stores/monday.store';
 import { ToastStore } from '../../core/stores/toast.store';
 import { WorkspaceStore } from '../../core/stores/workspace.store';
-import { ActionRowComponent } from '../../shared/action-row';
 import { AvatarComponent } from '../../shared/avatar';
 import { BlockedPillComponent } from '../../shared/blocked-pill';
 import { CiDotComponent } from '../../shared/ci-dot';
@@ -36,7 +34,6 @@ interface WorkGroup {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ActionRowComponent,
     AvatarComponent,
     BlockedPillComponent,
     CiDotComponent,
@@ -51,7 +48,6 @@ interface WorkGroup {
 })
 export class HomeComponent {
   private views = inject(ViewsService);
-  private issues = inject(IssuesService);
   private router = inject(Router);
   readonly ws = inject(WorkspaceStore);
   readonly ai = inject(AiStore);
@@ -79,9 +75,9 @@ export class HomeComponent {
   readonly dev = computed(() => this.data()?.developer ?? null);
   readonly po = computed(() => this.data()?.po ?? null);
 
-  /** "Your work" grouped: Blocked first, then by status (in progress → backlog). */
-  readonly workGroups = computed<WorkGroup[]>(() => {
-    const items = this.dev()?.myFocus ?? [];
+  /** "Product planning" grouped: Blocked first, then by status (in progress → backlog). */
+  readonly planningGroups = computed<WorkGroup[]>(() => {
+    const items = this.dev()?.productPlanning ?? [];
     const groups: WorkGroup[] = [];
     const blocked = items.filter((i) => i.blocked);
     if (blocked.length) groups.push({ label: 'Blocked', items: blocked });
@@ -142,20 +138,6 @@ export class HomeComponent {
 
   regenerate() {
     this.load(this.ws.role(), this.ws.space());
-  }
-
-  /** Unblock a ticket straight from the queue (optimistic-ish: reload + Undo). */
-  resolveBlocked(key: string) {
-    this.issues.patch(key, { blocked: false }).subscribe({
-      next: () => {
-        this.regenerate();
-        this.toast.show(`Unblocked ${key}`, {
-          actionLabel: 'Undo',
-          action: () => this.issues.patch(key, { blocked: true }).subscribe(() => this.regenerate()),
-        });
-      },
-      error: () => this.toast.show(`Couldn't unblock ${key}`, { tone: 'error' }),
-    });
   }
 
   /** Sync monday from the cockpit; the syncTick effect reloads the queue. */
